@@ -24,4 +24,5 @@ int main(void)
   main_menu_draw();
   main_menu_loop();
   finalize_graphics();
+  return 0;
 }
