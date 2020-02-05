@@ -70,7 +70,7 @@ void main_menu_draw(void)
     unsigned char j;
     unsigned char screen_x = 20 - ((strlen(s) + 1) >> 1);
     j = 0;
-    while(*s) {
+    while(*s != 0) {
       SCREEN[8 * 80 + (i << 1) * 40 + screen_x + j] = petscii_to_char(*s);
       s++;
       j++;
