@@ -30,14 +30,16 @@ void finalize_main_menu(void) {}
 
 static void draw_cursor(void)
 {
-  SCREEN[8 * 80 + (cursor << 1) * 40 + 20 - 8] = '>';
-  SCREEN[8 * 80 + (cursor << 1) * 40 + 20 + 7] = '<';
+  unsigned i = (cursor << 1) * 40;
+  SCREEN[8 * 80 + i + 20 - 8] = '>';
+  SCREEN[8 * 80 + i + 20 + 7] = '<';
 }
 
 static void draw_spaces(void)
 {
-  SCREEN[8 * 80 + (cursor << 1) * 40 + 20 - 8] = ' ';
-  SCREEN[8 * 80 + (cursor << 1) * 40 + 20 + 7] = ' ';
+  unsigned i = (cursor << 1) * 40;
+  SCREEN[8 * 80 + i + 20 - 8] = ' ';
+  SCREEN[8 * 80 + i + 20 + 7] = ' ';
 }
 
 void main_menu_draw(void)
