@@ -26,6 +26,6 @@ clean:
 	rm -f spacefire $(OBJS) *.d64 *~
 
 graphics.o: graphics.c graphics.h
-main.o: main.c graphics.h
+main.o: main.c graphics.h main_menu.h
 main_menu.o: main_menu.c main_menu.h graphics.h util.h
 util.o: util.c util.h
