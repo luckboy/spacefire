@@ -20,7 +20,9 @@
 
 #include <c64.h>
 
-#define SPRITE_OFFSET   50
+#define SPRITE_X_OFFSET 24
+#define SPRITE_Y_OFFSET 50
+
 #define RASTER_OFFSET   51
 
 #define SCREEN          ((unsigned char *) 0x6000)

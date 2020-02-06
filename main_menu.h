@@ -18,6 +18,9 @@
 #ifndef _MAIN_MENU_H
 #define _MAIN_MENU_H
 
+void initialize_main_menu(void);
+void finalize_main_menu(void);
+
 void main_menu_draw(void);
 void main_menu_loop(void);
 

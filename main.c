@@ -21,8 +21,10 @@
 int main(void)
 {
   initialize_graphics();
+  initialize_main_menu();
   main_menu_draw();
   main_menu_loop();
+  finalize_main_menu();
   finalize_graphics();
   return 0;
 }

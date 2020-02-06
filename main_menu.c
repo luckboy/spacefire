@@ -15,11 +15,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <6502.h>
 #include <c64.h>
 #include <string.h>
 #include "graphics.h"
 #include "main_menu.h"
 #include "util.h"
+
+static unsigned char cursor;
+
+void initialize_main_menu(void) { cursor = 0; }
+
+void finalize_main_menu(void) {}
+
+static void draw_cursor(void)
+{
+  SCREEN[8 * 80 + (cursor << 1) * 40 + 20 - 8] = '>';
+  SCREEN[8 * 80 + (cursor << 1) * 40 + 20 + 7] = '<';
+}
+
+static void draw_spaces(void)
+{
+  SCREEN[8 * 80 + (cursor << 1) * 40 + 20 - 8] = ' ';
+  SCREEN[8 * 80 + (cursor << 1) * 40 + 20 + 7] = ' ';
+}
 
 void main_menu_draw(void)
 {
@@ -76,10 +95,57 @@ void main_menu_draw(void)
       j++;
     }
   }
+  draw_cursor();
   VIC.ctrl1 |= 0x10;
 }
 
 void main_menu_loop(void)
 {
-  while(1);
+  char is_exit = 0;
+  unsigned char up_count = 0;
+  unsigned char down_count = 0;
+  SEI();
+  while(!is_exit) {
+    unsigned char port_a;
+    while(VIC.rasterline != RASTER_OFFSET - 8 || (VIC.ctrl1 & 0x80) != 0);
+    port_a = CIA1.pra;
+    if((port_a & 0x01) == 0) {
+      down_count = 0;
+      if(up_count == 0) {
+        if(cursor > 0) {
+          draw_spaces();
+          cursor--;
+          draw_cursor();
+        }
+      }
+      up_count++;
+      if(up_count >= 8) up_count = 0;
+    } else
+      up_count = 0;
+    if((port_a & 0x02) == 0) {
+      up_count = 0;
+      if(down_count == 0) {
+        if(cursor < 2) {
+          draw_spaces();
+          cursor++;
+          draw_cursor();
+        }
+      }
+      down_count++;
+      if(down_count >= 8) down_count = 0;
+    } else
+      down_count = 0;
+    if((port_a & 0x10) == 0) {
+      switch(cursor) {
+      case 0:
+        break;
+      case 1:
+        break;
+      case 2:
+        is_exit = 1;
+        break;
+      }
+    }
+  }
+  CLI();
 }
