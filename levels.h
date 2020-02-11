@@ -15,31 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _GRAPHICS_H
-#define _GRAPHICS_H
+#ifndef _LEVELS_H
+#define _LEVELS_H
 
-#include <c64.h>
+#define LEVEL_COUNT             1
 
-#define SPRITE_X_OFFSET 24
-#define SPRITE_Y_OFFSET 50
+struct level
+{
+  const char *chars[11];
+  const char *enemies[3];
+};
 
-#define RASTER_OFFSET   51
-
-#define SCREEN1         ((unsigned char *) 0x6000)
-#define SCREEN2         ((unsigned char *) 0x6400)
-#define SPR_POINTERS1   (SCREEN1 + 0x3f8)
-#define SPR_POINTERS2   (SCREEN2 + 0x3f8)
-#define SCREEN          SCREEN1
-#define SPR_POINTERS    SPR_POINTERS1
-#define CHARS           ((unsigned char *) 0x6800)
-#define SPRITES         ((unsigned char *) 0x7000)
-#define SPRITE_COUNT    1
-
-extern const char petscii_chars[8 * 64];
-extern const char level_chars[8 * 64];
-extern const char sprites[64 * SPRITE_COUNT];
-
-void initialize_graphics(void);
-void finalize_graphics(void);
+extern struct level levels[LEVEL_COUNT];
 
 #endif

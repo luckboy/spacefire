@@ -40,6 +40,7 @@ void initialize_graphics(void)
   saved_fg_color = *((unsigned char *) 0x286);
   memcpy(CHARS + 0x00 * 8, petscii_chars, 8 * 64);
   memcpy(CHARS + 0xc0 * 8, level_chars, 8 * 64);
+  memcpy(SPRITES, sprites, 64 * SPRITE_COUNT);
   CIA2.pra = (CIA2.pra & ~0x03) | 0x02;
   VIC.ctrl1 = 0x0b;
   VIC.ctrl2 = 0xd8;
@@ -49,6 +50,8 @@ void initialize_graphics(void)
   VIC.bgcolor0 = COLOR_BLACK;
   VIC.bgcolor1 = COLOR_GRAY1;
   VIC.bgcolor2 = COLOR_GRAY3;
+  VIC.spr_mcolor0 = COLOR_GRAY2;
+  VIC.spr_mcolor1 = COLOR_GRAY3;
   for(i = 0; i < 40 * 25; i++) {
     SCREEN[i] = ' ';
     COLOR_RAM[i] = COLOR_WHITE;

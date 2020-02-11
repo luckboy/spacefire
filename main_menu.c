@@ -18,6 +18,7 @@
 #include <6502.h>
 #include <c64.h>
 #include <string.h>
+#include "game.h"
 #include "graphics.h"
 #include "main_menu.h"
 #include "util.h"
@@ -140,6 +141,9 @@ void main_menu_loop(void)
     if((port_a & 0x10) == 0) {
       switch(cursor) {
       case 0:
+        CLI();
+        game_loop();
+        SEI();
         break;
       case 1:
         break;

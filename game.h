@@ -15,31 +15,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _GRAPHICS_H
-#define _GRAPHICS_H
+#ifndef _GAME_H
+#define _GAME_H
 
-#include <c64.h>
+#include "levels.h"
 
-#define SPRITE_X_OFFSET 24
-#define SPRITE_Y_OFFSET 50
+#define GAME_PLAYER_LIVE        0
+#define GAME_PLAYER_DESTROYING  1
+#define GAME_PLAYER_DESTROYED   2
 
-#define RASTER_OFFSET   51
+struct player
+{
+  unsigned char state;
+  unsigned x;
+  unsigned char y;
+  unsigned char sprite;
+  unsigned char lives;
+  unsigned long score;
+};
 
-#define SCREEN1         ((unsigned char *) 0x6000)
-#define SCREEN2         ((unsigned char *) 0x6400)
-#define SPR_POINTERS1   (SCREEN1 + 0x3f8)
-#define SPR_POINTERS2   (SCREEN2 + 0x3f8)
-#define SCREEN          SCREEN1
-#define SPR_POINTERS    SPR_POINTERS1
-#define CHARS           ((unsigned char *) 0x6800)
-#define SPRITES         ((unsigned char *) 0x7000)
-#define SPRITE_COUNT    1
+extern unsigned char start_level_index;
+extern unsigned char current_level_index;
+extern struct level current_level;
+extern struct player player;
 
-extern const char petscii_chars[8 * 64];
-extern const char level_chars[8 * 64];
-extern const char sprites[64 * SPRITE_COUNT];
+void initialize_game(void);
+void finalize_game(void);
 
-void initialize_graphics(void);
-void finalize_graphics(void);
+void game_loop(void);
+
+void game_move_player_up(void);
+void game_move_player_down(void);
+void game_move_player_left(void);
+void game_move_player_right(void);
+void game_set_player_sprite(void);
 
 #endif

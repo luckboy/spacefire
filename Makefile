@@ -5,7 +5,7 @@ LDFLAGS =
 C1541 = c1541
 SYS = c64
 
-OBJS = chars.o graphics.o main.o main_menu.o util.o
+OBJS = chars.o game.o game_asm.o graphics.o levels.o main.o main_menu.o sprites.o util.o
 
 .c.o:
 	$(CC) -c -t $(SYS) $(CFLAGS) -o $@ $<
@@ -17,7 +17,7 @@ all: spacefire
 
 spacefire: $(OBJS)
 	$(CC) -t $(SYS) -o $@ $^
-	
+
 spacefire.d64: all
 	$(C1541) -format spacefire,AA  d64 $@
 	$(C1541) -attach $@ -write spacefire spacefire
@@ -25,7 +25,10 @@ spacefire.d64: all
 clean:
 	rm -f spacefire $(OBJS) *.d64 *~
 
+game.o: game.c game.h graphics.h levels.h util.h
+game_asm.o: game_asm.s game.inc graphics.inc
 graphics.o: graphics.c graphics.h
-main.o: main.c graphics.h main_menu.h
-main_menu.o: main_menu.c main_menu.h graphics.h util.h
+levels.o: levels.c levels.h
+main.o: main.c game.h graphics.h main_menu.h
+main_menu.o: main_menu.c main_menu.h game.h graphics.h util.h
 util.o: util.c util.h
