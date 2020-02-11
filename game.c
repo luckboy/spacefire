@@ -37,7 +37,7 @@ static void set_level(void)
 {
   player.state = GAME_PLAYER_LIVE;
   player.x = SPRITE_X_OFFSET + 8;
-  player.y = SPRITE_Y_OFFSET + 11 * 8 - (20 >> 1);
+  player.y = SPRITE_Y_OFFSET + 11 * 8 - (24 >> 1);
   player.sprite = (((unsigned) (SPRITES + 0)) - 0x4000) >> 6;
 }
 
