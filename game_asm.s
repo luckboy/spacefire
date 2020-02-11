@@ -30,7 +30,9 @@ PLAYER_X_MIN = SPRITE_X_OFFSET + 8
 PLAYER_X_MAX = SPRITE_X_OFFSET + 40 * 8 - 8 - 24
 PLAYER_Y_MIN = SPRITE_Y_OFFSET
 PLAYER_Y_MAX = SPRITE_Y_OFFSET + 22 * 8 - 21
-        
+
+        .code
+
 .proc _game_move_player_up
         ; if(player.y > PLAYER_Y_MIN)
         lda #PLAYER_Y_MIN
