@@ -26,7 +26,7 @@ clean:
 	rm -f spacefire $(OBJS) *.d64 *~
 
 game.o: game.c game.h graphics.h levels.h util.h
-game_asm.o: game_asm.s game.inc graphics.inc
+game_asm.o: game_asm.s game.inc graphics.inc levels.inc
 graphics.o: graphics.c graphics.h
 levels.o: levels.c levels.h
 main.o: main.c game.h graphics.h main_menu.h

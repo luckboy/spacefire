@@ -23,6 +23,10 @@
 #include "levels.h"
 #include "util.h"
 
+unsigned char level_pos;
+unsigned char block_pos;
+unsigned char scroll_pos;
+
 unsigned char start_level_index;
 unsigned char current_level_index;
 struct level current_level;
@@ -39,6 +43,9 @@ static void set_level(void)
   player.x = SPRITE_X_OFFSET + 8;
   player.y = SPRITE_Y_OFFSET + 11 * 8 - (24 >> 1);
   player.sprite = (((unsigned) (SPRITES + 0)) - 0x4000) >> 6;
+  level_pos = 20;
+  block_pos = 0;
+  scroll_pos = 6;
 }
 
 static void draw_level(void)
@@ -118,8 +125,9 @@ static char play_level(void)
 {
   SEI();
   while(1) {
-    while(VIC.rasterline != RASTER_OFFSET - 4 || (VIC.ctrl1 & 0x80) != 0);
-    VIC.ctrl2 = 0xd6;
+    while(VIC.rasterline != RASTER_OFFSET - 50 || (VIC.ctrl1 & 0x80) != 0);
+    game_scroll_screen();
+    while(VIC.rasterline != RASTER_OFFSET - 4);
     if(player.state == GAME_PLAYER_LIVE) {
       unsigned char port_a = CIA1.pra;
       if((port_a & 0x01) == 0) game_move_player_up();

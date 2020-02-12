@@ -34,6 +34,10 @@ struct player
   unsigned long score;
 };
 
+extern unsigned char level_pos;
+extern unsigned char block_pos;
+extern unsigned char scroll_pos;
+
 extern unsigned char start_level_index;
 extern unsigned char current_level_index;
 extern struct level current_level;
@@ -49,5 +53,6 @@ void game_move_player_down(void);
 void game_move_player_left(void);
 void game_move_player_right(void);
 void game_set_player_sprite(void);
+void game_scroll_screen(void);
 
 #endif
