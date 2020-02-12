@@ -203,9 +203,9 @@ L06move_screen1_loop:
         jmp L06move_screen1_loop
 L06no_move_screen1_loop:
         lda _scroll_pos
-        beq L06copy_level_chars_to_screen1
+        beq L06copy_level_chars_to_screen2
         jmp L06scroll
-L06copy_level_chars_to_screen1:
+L06copy_level_chars_to_screen2:
         ldy _level_pos
         ; 1
         lda _current_level + level::chars + 0 * 2
@@ -424,9 +424,9 @@ L06move_screen2_loop:
         jmp L06move_screen2_loop
 L06no_move_screen2_loop:
         lda _scroll_pos
-        beq L06copy_level_chars_to_screen2
+        beq L06copy_level_chars_to_screen1
         jmp L06scroll
-L06copy_level_chars_to_screen2:
+L06copy_level_chars_to_screen1:
         ldy _level_pos
         ; 1
         lda _current_level + level::chars + 0 * 2
