@@ -112,8 +112,8 @@ static void draw_level(void)
   }
   VIC.ctrl2 = 0xd6;
   VIC.spr_ena = 0x01;
-  SPR_POINTERS1[0] = player.sprite;
-  SPR_POINTERS2[0] = player.sprite;
+  SPRITE_PTRS1[0] = player.sprite;
+  SPRITE_PTRS2[0] = player.sprite;
   VIC.spr0_x = player.x & 0xff;
   VIC.spr0_y = player.y;
   VIC.spr_hi_x = player.x >> 8;

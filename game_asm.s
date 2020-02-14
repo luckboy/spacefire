@@ -110,8 +110,8 @@ L0402:  rts
         lda _player + player::y_coord
         sta VIC_SPR0_Y
         lda _player + player::sprite
-        sta SPR_POINTERS1 + 0
-        sta SPR_POINTERS2 + 0
+        sta SPRITE_PTRS1 + 0
+        sta SPRITE_PTRS2 + 0
         lda #$01 ; white
         sta VIC_SPR0_COLOR
         rts

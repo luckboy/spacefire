@@ -28,10 +28,10 @@
 #define VIC_BANK        1
 #define SCREEN1         ((unsigned char *) 0x6000)
 #define SCREEN2         ((unsigned char *) 0x6400)
-#define SPR_POINTERS1   (SCREEN1 + 0x3f8)
-#define SPR_POINTERS2   (SCREEN2 + 0x3f8)
+#define SPRITE_PTRS1    (SCREEN1 + 0x3f8)
+#define SPRITE_PTRS2    (SCREEN2 + 0x3f8)
 #define SCREEN          SCREEN1
-#define SPR_POINTERS    SPR_POINTERS1
+#define SPRITE_PTRS     SPRITE_PTRS1
 #define CHARS           ((unsigned char *) 0x6800)
 #define SPRITES         ((unsigned char *) 0x7000)
 #define SPRITE_COUNT    1
