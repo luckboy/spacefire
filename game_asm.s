@@ -363,7 +363,7 @@ L0621:  sta SCREEN2 + 40 * (10 * 2 + 0) + 39
         sta SCREEN2 + 40 * (10 * 2 + 1) + 39
 L0622:  lda VIC_VIDEO_ADR
         and #$0f
-        ora #((SCREEN2 -$4000) >> 10) << 4 
+        ora #((SCREEN2 - (VIC_BANK << 14)) >> 10) << 4 
         sta VIC_VIDEO_ADR
         lda #1
         sta _block_pos
@@ -595,7 +595,7 @@ L0643:  ora #$10
         sta SCREEN1 + 40 * (10 * 2 + 1) + 39
 L0644:  lda VIC_VIDEO_ADR
         and #$0f
-        ora #((SCREEN1 -$4000) >> 10) << 4 
+        ora #((SCREEN1 - (VIC_BANK << 14)) >> 10) << 4 
         sta VIC_VIDEO_ADR
         lda #0
         sta _block_pos

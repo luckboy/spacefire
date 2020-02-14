@@ -42,7 +42,7 @@ static void set_level(void)
   player.state = GAME_PLAYER_LIVE;
   player.x = SPRITE_X_OFFSET + 8;
   player.y = SPRITE_Y_OFFSET + 11 * 8 - (24 >> 1);
-  player.sprite = (((unsigned) (SPRITES + 0)) - 0x4000) >> 6;
+  player.sprite = (((unsigned) (SPRITES + 0)) - (VIC_BANK << 14)) >> 6;
   level_pos = 20;
   block_pos = 0;
   scroll_pos = 6;
@@ -148,7 +148,7 @@ static void draw_blank_screen(void)
   unsigned i;
   VIC.ctrl1 &= 0xef;
   VIC.spr_ena = 0x00;
-  VIC.addr = (VIC.addr & 0x0f) | (((((unsigned) SCREEN) - 0x4000) >> 10) << 4);
+  VIC.addr = (VIC.addr & 0x0f) | (((((unsigned) SCREEN) - (VIC_BANK << 14)) >> 10) << 4);
   for(i = 0; i < 40 * 25; i++) {
     SCREEN[i] = ' ';
     COLOR_RAM[i] = COLOR_WHITE;

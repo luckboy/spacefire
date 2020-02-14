@@ -41,10 +41,10 @@ void initialize_graphics(void)
   memcpy(CHARS + 0x00 * 8, petscii_chars, 8 * 64);
   memcpy(CHARS + 0xc0 * 8, level_chars, 8 * 64);
   memcpy(SPRITES, sprites, 64 * SPRITE_COUNT);
-  CIA2.pra = (CIA2.pra & ~0x03) | 0x02;
+  CIA2.pra = (CIA2.pra & ~0x03) | (VIC_BANK ^ 3);
   VIC.ctrl1 = 0x0b;
   VIC.ctrl2 = 0xd8;
-  VIC.addr = (((((unsigned) SCREEN) - 0x4000) >> 10) << 4) | (((((unsigned) (CHARS)) - 0x4000) >> 11) << 1); 
+  VIC.addr = (((((unsigned) SCREEN) - (VIC_BANK << 14)) >> 10) << 4) | (((((unsigned) (CHARS)) - (VIC_BANK << 14)) >> 11) << 1); 
   VIC.spr_ena = 0x00;
   VIC.bordercolor = COLOR_BLACK;
   VIC.bgcolor0 = COLOR_BLACK;

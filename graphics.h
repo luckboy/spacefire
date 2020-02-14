@@ -25,6 +25,7 @@
 
 #define RASTER_OFFSET   51
 
+#define VIC_BANK        1
 #define SCREEN1         ((unsigned char *) 0x6000)
 #define SCREEN2         ((unsigned char *) 0x6400)
 #define SPR_POINTERS1   (SCREEN1 + 0x3f8)

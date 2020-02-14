@@ -21,6 +21,7 @@ SPRITE_Y_OFFSET = 50
 
 RASTER_OFFSET   = 51
 
+VIC_BANK        = 1
 SCREEN1         := $6000
 SCREEN2         := $6400
 SPR_POINTERS1   := SCREEN1 + $3f8
