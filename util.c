@@ -24,3 +24,29 @@ unsigned char petscii_to_char(char c)
   else
     return c;
 }
+
+void x8_to_dec_digits(unsigned char x, char *buf, unsigned char count)
+{
+  unsigned char i;
+  char *s = buf + count;
+  *s = 0;
+  s--;
+  for(i = count; i > 0; i--) {
+    *s = (x % 10) + '0';
+    x /= 10; 
+    s--;
+  }
+}
+
+void x32_to_dec_digits_for_dec_mode(unsigned long x, char *buf, unsigned char count)
+{
+  unsigned char i;
+  char *s = buf + count;
+  *s = 0;
+  s--;
+  for(i = count; i > 0; i--) {
+    *s = (x & 0xf) + '0';
+    x >>= 4; 
+    s--;
+  }
+}

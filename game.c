@@ -17,7 +17,7 @@
  */
 #include <6502.h>
 #include <c64.h>
-#include <stdio.h>
+#include <string.h>
 #include "game.h"
 #include "graphics.h"
 #include "levels.h"
@@ -50,7 +50,7 @@ static void set_level(void)
 
 static void draw_level(void)
 {
-  static char buf[128];
+  static char buf[32];
   char *s;
   unsigned char x, y;
   unsigned i;
@@ -80,7 +80,8 @@ static void draw_level(void)
     SCREEN2[i] = ' ';
     COLOR_RAM[i] = COLOR_WHITE;
   }
-  sprintf(buf, "lives: %01u", (unsigned) player.lives);
+  strcpy(buf, "lives: ");
+  x8_to_dec_digits(player.lives, buf + strlen(buf), 1);
   s = buf;
   i = 0;
   while(*s != 0) {
@@ -89,7 +90,8 @@ static void draw_level(void)
     s++;
     i++;
   }
-  sprintf(buf, "level: %02u", (unsigned) (current_level_index + 1));
+  strcpy(buf, "level: ");
+  x8_to_dec_digits((current_level_index + 1), buf + strlen(buf), 2);
   s = buf;
   i = 0;
   while(*s != 0) {
@@ -98,7 +100,8 @@ static void draw_level(void)
     s++;
     i++;
   }
-  sprintf(buf, "score: %08lx", player.score);
+  strcpy(buf, "score: ");
+  x32_to_dec_digits_for_dec_mode(player.score, buf + strlen(buf), 8);
   s = buf;
   i = 0;
   while(*s != 0) {

@@ -19,5 +19,7 @@
 #define _UTIL_H
 
 unsigned char petscii_to_char(char c);
+void x8_to_dec_digits(unsigned char x, char *buf, unsigned char count);
+void x32_to_dec_digits_for_dec_mode(unsigned long x, char *buf, unsigned char count);
 
 #endif
