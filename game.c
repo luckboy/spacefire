@@ -101,12 +101,12 @@ static void draw_level(void)
     i++;
   }
   strcpy(buf, "score: ");
-  x32_to_dec_digits_for_dec_mode(player.score, buf + strlen(buf), 8);
+  x32_to_dec_digits_for_dec_mode(player.score, buf + strlen(buf), 6);
   s = buf;
   i = 0;
   while(*s != 0) {
-    SCREEN1[40 * 23 + 40 - 15 + i] = petscii_to_char(*s);
-    SCREEN2[40 * 23 + 40 - 15 + i] = petscii_to_char(*s);
+    SCREEN1[40 * 23 + 40 - 13 + i] = petscii_to_char(*s);
+    SCREEN2[40 * 23 + 40 - 13 + i] = petscii_to_char(*s);
     s++;
     i++;
   }
