@@ -24,6 +24,8 @@
 #define GAME_PLAYER_LIVE        1
 #define GAME_PLAYER_DESTROYING  2
 
+#define GAME_SHOT_COUNT_MAX     3
+
 struct player
 {
   unsigned char state;
@@ -35,6 +37,15 @@ struct player
   unsigned long score;
 };
 
+struct shot
+{
+  char is_enabled;
+  unsigned x;
+  unsigned char y;
+  unsigned char x_steps[2];
+  unsigned char sprite;
+};
+
 extern unsigned char level_pos;
 extern unsigned char block_pos;
 extern unsigned char scroll_pos;
@@ -44,6 +55,8 @@ extern unsigned char start_level_index;
 extern unsigned char current_level_index;
 extern struct level current_level;
 extern struct player player;
+extern struct shot shots[GAME_SHOT_COUNT_MAX];
+extern unsigned char shot_alloc_index;
 
 void initialize_game(void);
 void finalize_game(void);
@@ -57,5 +70,8 @@ void game_move_player_right(void);
 void game_set_player_sprite(void);
 void game_scroll_screen(void);
 char game_move_player(void);
+void game_player_shoot(void);
+void game_move_shots(void);
+void game_set_shot_sprites(void);
 
 #endif

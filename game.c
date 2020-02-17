@@ -23,6 +23,8 @@
 #include "levels.h"
 #include "util.h"
 
+#define SHOT_INTERVAL   ((40 * 8 - 2 * 8 - 24 + 23) / 24 + 2) / 3
+
 unsigned char level_pos;
 unsigned char block_pos;
 unsigned char scroll_pos;
@@ -32,6 +34,8 @@ unsigned char start_level_index;
 unsigned char current_level_index;
 struct level current_level;
 struct player player;
+struct shot shots[GAME_SHOT_COUNT_MAX];
+unsigned char shot_alloc_index;
 
 void initialize_game(void)
 { start_level_index = 0; }
@@ -40,12 +44,22 @@ void finalize_game(void) {}
 
 static void set_level(void)
 {
+  unsigned char i;
   player.state = GAME_PLAYER_LIVE;
   player.x = SPRITE_X_OFFSET + 8;
   player.y = SPRITE_Y_OFFSET + 11 * 8 - (24 >> 1);
   player.x_steps[0] = 2;
   player.x_steps[1] = 0;
   player.sprite = (((unsigned) (SPRITES + 0)) - (VIC_BANK << 14)) >> 6;
+  for(i = 0; i < GAME_SHOT_COUNT_MAX; i++) {
+    shots[i].is_enabled = 0;
+    shots[i].x = 0;
+    shots[i].y = 0;
+    shots[i].x_steps[0] = 24 + 2;
+    shots[i].x_steps[1] = 24;
+    shots[i].sprite = (((unsigned) (SPRITES + 64)) - (VIC_BANK << 14)) >> 6;
+  }
+  shot_alloc_index = 0;
   level_pos = 20;
   block_pos = 0;
   scroll_pos = 6;
@@ -129,7 +143,12 @@ static void draw_level(void)
 
 static char play_level(void)
 {
-  static char is_passed = 1;
+  static char is_passed;
+  static unsigned char shot_count;
+  static char is_shot;
+  is_passed = 1;
+  shot_count = 0;
+  is_shot = 0;
   SEI();
   while(1) {
     static unsigned char port_a;
@@ -147,7 +166,22 @@ static char play_level(void)
       is_passed = (player.state == GAME_PLAYER_LIVE);
       break;
     }
+    game_move_shots();
+    if(player.state == GAME_PLAYER_LIVE) {
+      if((port_a & 0x10) == 0) {
+        if(shot_count == 0) {
+          game_player_shoot();
+          is_shot = 1;
+        }
+      }
+    }
+    if(is_shot)shot_count++;
+    if(shot_count >= SHOT_INTERVAL) {
+      shot_count = 0;
+      is_shot = 0;
+    }
     game_set_player_sprite();
+    game_set_shot_sprites();
     while(VIC.rasterline != RASTER_OFFSET + 23 * 8 - 4);
     VIC.ctrl2 = 0xd8;
   }
