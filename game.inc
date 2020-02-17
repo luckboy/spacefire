@@ -16,14 +16,15 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;
 
-GAME_PLAYER_LIVE        = 0
-GAME_PLAYER_DESTROYING  = 1
-GAME_PLAYER_DESTROYED   = 2
+GAME_PLAYER_DISABLED    = 0
+GAME_PLAYER_LIVE        = 1
+GAME_PLAYER_DESTROYING  = 2
 
 .struct player
     state   .byte
     x_coord .word
     y_coord .byte
+    x_steps .byte 2
     sprite  .byte
     lives   .byte
     score   .dword

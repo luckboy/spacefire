@@ -21,9 +21,11 @@
         .export _game_move_player_right
         .export _game_set_player_sprite
         .export _game_scroll_screen
+        .export _game_move_player
         .import _level_pos
         .import _block_pos
         .import _scroll_pos
+        .import _is_scroll
         .import _player
         .import _current_level
         .importzp tmp1, ptr1
@@ -37,6 +39,7 @@ PLAYER_X_MIN = SPRITE_X_OFFSET + 8
 PLAYER_X_MAX = SPRITE_X_OFFSET + 40 * 8 - 8 - 24
 PLAYER_Y_MIN = SPRITE_Y_OFFSET
 PLAYER_Y_MAX = SPRITE_Y_OFFSET + 22 * 8 - 22
+PASSING_PLAYER_X_MAX = SPRITE_X_OFFSET + 40 * 8 - 8
 
         .code
 
@@ -138,7 +141,13 @@ Ltab_last_xs:
         beq L06no_scroll
         dec _scroll_pos
         dec _scroll_pos
+        lda #1
+        sta _is_scroll
+        jmp L06set_scroll1
 L06no_scroll:
+        lda #0
+        sta _is_scroll
+L06set_scroll1:
         lda #$d0
         ora _scroll_pos
         sta VIC_CTRL2
@@ -605,13 +614,37 @@ L06scroll:
         beq L06scroll_start
         dec _scroll_pos
         dec _scroll_pos
-        jmp L06set_scroll
+        jmp L06set_scroll2
 L06scroll_start:
         lda #6
         sta _scroll_pos
-L06set_scroll:
+L06set_scroll2:
+        lda #1
+        sta _is_scroll
         lda #$d0
         ora _scroll_pos
         sta VIC_CTRL2
+        rts
+.endproc
+
+.proc _game_move_player
+        ; if(player.x < PASSING_PLAYER_X_MAX)
+        lda _player + player::x_coord + 1
+        cmp #>PASSING_PLAYER_X_MAX
+        bne L0701
+        lda _player + player::x_coord
+        cmp #<PASSING_PLAYER_X_MAX
+L0701:  bcs L0702                               ; !(player.x < PASSING_PLAYER_X_MAX)
+        ldx _is_scroll
+        clc
+        lda _player + player::x_coord
+        adc _player + player::x_steps, x
+        sta _player + player::x_coord
+        lda _player + player::x_coord + 1
+        adc #0
+        sta _player + player::x_coord + 1
+        lda #1
+        rts
+L0702:  lda #0
         rts
 .endproc

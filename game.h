@@ -20,15 +20,16 @@
 
 #include "levels.h"
 
-#define GAME_PLAYER_LIVE        0
-#define GAME_PLAYER_DESTROYING  1
-#define GAME_PLAYER_DESTROYED   2
+#define GAME_PLAYER_DISABLED    0
+#define GAME_PLAYER_LIVE        1
+#define GAME_PLAYER_DESTROYING  2
 
 struct player
 {
   unsigned char state;
   unsigned x;
   unsigned char y;
+  unsigned char x_steps[2];
   unsigned char sprite;
   unsigned char lives;
   unsigned long score;
@@ -37,6 +38,7 @@ struct player
 extern unsigned char level_pos;
 extern unsigned char block_pos;
 extern unsigned char scroll_pos;
+extern char is_scroll;
 
 extern unsigned char start_level_index;
 extern unsigned char current_level_index;
@@ -54,5 +56,6 @@ void game_move_player_left(void);
 void game_move_player_right(void);
 void game_set_player_sprite(void);
 void game_scroll_screen(void);
+char game_move_player(void);
 
 #endif

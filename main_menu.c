@@ -144,6 +144,7 @@ void main_menu_loop(void)
         CLI();
         game_loop();
         SEI();
+        main_menu_draw();
         break;
       case 1:
         break;

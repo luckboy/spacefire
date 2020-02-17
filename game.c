@@ -26,6 +26,7 @@
 unsigned char level_pos;
 unsigned char block_pos;
 unsigned char scroll_pos;
+char is_scroll;
 
 unsigned char start_level_index;
 unsigned char current_level_index;
@@ -42,6 +43,8 @@ static void set_level(void)
   player.state = GAME_PLAYER_LIVE;
   player.x = SPRITE_X_OFFSET + 8;
   player.y = SPRITE_Y_OFFSET + 11 * 8 - (24 >> 1);
+  player.x_steps[0] = 2;
+  player.x_steps[1] = 0;
   player.sprite = (((unsigned) (SPRITES + 0)) - (VIC_BANK << 14)) >> 6;
   level_pos = 20;
   block_pos = 0;
@@ -126,24 +129,30 @@ static void draw_level(void)
 
 static char play_level(void)
 {
+  static char is_passed = 1;
   SEI();
   while(1) {
+    static unsigned char port_a;
     while(VIC.rasterline != RASTER_OFFSET - 50 || (VIC.ctrl1 & 0x80) != 0);
     game_scroll_screen();
     while(VIC.rasterline != RASTER_OFFSET - 4);
+    port_a = CIA1.pra;
     if(player.state == GAME_PLAYER_LIVE) {
-      unsigned char port_a = CIA1.pra;
       if((port_a & 0x01) == 0) game_move_player_up();
       if((port_a & 0x02) == 0) game_move_player_down();
       if((port_a & 0x04) == 0) game_move_player_left();
       if((port_a & 0x08) == 0) game_move_player_right();
+    }
+    if(!game_move_player()) {
+      is_passed = (player.state == GAME_PLAYER_LIVE);
+      break;
     }
     game_set_player_sprite();
     while(VIC.rasterline != RASTER_OFFSET + 23 * 8 - 4);
     VIC.ctrl2 = 0xd8;
   }
   CLI();
-  return 1;
+  return is_passed;
 }
 
 static void draw_blank_screen(void)
