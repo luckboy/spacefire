@@ -25,10 +25,13 @@
         .export _game_player_shoot
         .export _game_move_shots
         .export _game_set_shot_sprites
+        .export _game_change_player_state
+        .export _game_change_shot_states
         .import _level_pos
         .import _block_pos
         .import _scroll_pos
         .import _is_scroll
+        .import _sprite_bg_coll
         .import _current_level
         .import _player
         .import _shots
@@ -140,8 +143,13 @@ L0402:  rts
         lda _player + player::sprite
         sta SPRITE_PTRS1 + 0
         sta SPRITE_PTRS2 + 0
+        lda _player + player::state
+        cmp #GAME_PLAYER_DESTROYING
+        beq L0501
         lda #$01 ; white
-        sta VIC_SPR0_COLOR
+        jmp L0502
+L0501:  lda #$07 ; yellow
+L0502:  sta VIC_SPR0_COLOR
         rts
 .endproc
 
@@ -848,4 +856,55 @@ L1005:  lda VIC_SPR_ENA
         and #$f7
         sta VIC_SPR_ENA
 L1006:  rts
+.endproc
+
+.proc _game_change_player_state
+        lda _player + player::state
+        cmp #GAME_PLAYER_LIVE
+        bne L1101
+        lda _sprite_bg_coll
+        and #$01
+        beq L1102
+        lda #GAME_PLAYER_DESTROYING
+        sta _player + player::state
+        lda _player + player::start_explosion_sprite
+        sta _player + player::sprite
+L1102:  lda #1
+        rts
+L1101:  lda _player + player::state
+        cmp #GAME_PLAYER_DESTROYING
+        bne L1103
+        inc _player + player::sprite
+        lda _player + player::sprite
+        cmp _player + player::end_explosion_sprite
+        beq L1103
+        lda #1
+        rts
+L1103:  lda #0
+        rts
+.endproc
+
+.proc _game_change_shot_states
+        lda _shots + shot::is_enabled + .sizeof(shot) * 0
+        beq L1201
+        lda _sprite_bg_coll
+        and #$02
+        beq L1201
+        lda #0
+        sta _shots + shot::is_enabled + .sizeof(shot) * 0
+L1201:  lda _shots + shot::is_enabled + .sizeof(shot) * 1
+        beq L1202
+        lda _sprite_bg_coll
+        and #$04
+        beq L1202
+        lda #0
+        sta _shots + shot::is_enabled + .sizeof(shot) * 1
+L1202:  lda _shots + shot::is_enabled + .sizeof(shot) * 2
+        beq L1203
+        lda _sprite_bg_coll
+        and #$08
+        beq L1203
+        lda #0
+        sta _shots + shot::is_enabled + .sizeof(shot) * 2
+L1203:  rts
 .endproc

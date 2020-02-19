@@ -30,6 +30,8 @@ GAME_SHOT_COUNT_MAX     = 3
     sprite  .byte
     lives   .byte
     score   .dword
+    start_explosion_sprite .byte
+    end_explosion_sprite .byte
 .endstruct
 
 .struct shot

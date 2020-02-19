@@ -46,6 +46,7 @@ void initialize_graphics(void)
   VIC.ctrl2 = 0xd8;
   VIC.addr = (((((unsigned) SCREEN) - (VIC_BANK << 14)) >> 10) << 4) | (((((unsigned) (CHARS)) - (VIC_BANK << 14)) >> 11) << 1); 
   VIC.spr_ena = 0x00;
+  VIC.spr_bg_prio = 0x00;
   VIC.bordercolor = COLOR_BLACK;
   VIC.bgcolor0 = COLOR_BLACK;
   VIC.bgcolor1 = COLOR_GRAY1;

@@ -30,6 +30,8 @@ unsigned char block_pos;
 unsigned char scroll_pos;
 char is_scroll;
 
+unsigned char sprite_bg_coll;
+
 unsigned char start_level_index;
 unsigned char current_level_index;
 struct level current_level;
@@ -50,14 +52,16 @@ static void set_level(void)
   player.y = SPRITE_Y_OFFSET + 11 * 8 - (24 >> 1);
   player.x_steps[0] = 2;
   player.x_steps[1] = 0;
-  player.sprite = (((unsigned) (SPRITES + 0)) - (VIC_BANK << 14)) >> 6;
+  player.sprite = (((unsigned) (SPRITES + 64 * 0)) - (VIC_BANK << 14)) >> 6;
+  player.start_explosion_sprite = (((unsigned) (SPRITES + 64 * 2)) - (VIC_BANK << 14)) >> 6;
+  player.end_explosion_sprite = (((unsigned) (SPRITES + 64 * 18)) - (VIC_BANK << 14)) >> 6;
   for(i = 0; i < GAME_SHOT_COUNT_MAX; i++) {
     shots[i].is_enabled = 0;
     shots[i].x = 0;
     shots[i].y = 0;
     shots[i].x_steps[0] = 24 + 2;
     shots[i].x_steps[1] = 24;
-    shots[i].sprite = (((unsigned) (SPRITES + 64)) - (VIC_BANK << 14)) >> 6;
+    shots[i].sprite = (((unsigned) (SPRITES + 64 * 1)) - (VIC_BANK << 14)) >> 6;
   }
   shot_alloc_index = 0;
   level_pos = 20;
@@ -184,6 +188,12 @@ static char play_level(void)
     game_set_shot_sprites();
     while(VIC.rasterline != RASTER_OFFSET + 23 * 8 - 4);
     VIC.ctrl2 = 0xd8;
+    sprite_bg_coll = VIC.spr_bg_coll;
+    if(!game_change_player_state()) {
+      is_passed = 0;
+      break;
+    }
+    game_change_shot_states();
   }
   CLI();
   return is_passed;

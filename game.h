@@ -35,6 +35,8 @@ struct player
   unsigned char sprite;
   unsigned char lives;
   unsigned long score;
+  unsigned char start_explosion_sprite;
+  unsigned char end_explosion_sprite;
 };
 
 struct shot
@@ -50,6 +52,8 @@ extern unsigned char level_pos;
 extern unsigned char block_pos;
 extern unsigned char scroll_pos;
 extern char is_scroll;
+
+extern unsigned char sprite_bg_coll;
 
 extern unsigned char start_level_index;
 extern unsigned char current_level_index;
@@ -73,5 +77,7 @@ char game_move_player(void);
 void game_player_shoot(void);
 void game_move_shots(void);
 void game_set_shot_sprites(void);
+char game_change_player_state(void);
+void game_change_shot_states(void);
 
 #endif
