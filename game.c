@@ -158,7 +158,7 @@ static char play_level(void)
     static unsigned char port_a;
     while(VIC.rasterline != ((RASTER_OFFSET + 25 * 8 + 32) & 0xff) || (VIC.ctrl1 & 0x80) != 0x80);
     game_scroll_screen();
-    while(VIC.rasterline != RASTER_OFFSET - 16);
+    while(VIC.rasterline != RASTER_OFFSET - 16  || (VIC.ctrl1 & 0x80) != 0);
     port_a = CIA1.pra;
     if(player.state == GAME_STATE_LIVE) {
       if((port_a & 0x01) == 0) game_move_player_up();
