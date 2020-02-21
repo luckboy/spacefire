@@ -877,7 +877,7 @@ L1101:  lda _player + player::state
         inc _player + player::sprite
         lda _player + player::sprite
         cmp _player + player::end_explosion_sprite
-        beq L1103
+        bcs L1103
         lda #1
         rts
 L1103:  lda #0
