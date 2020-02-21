@@ -16,9 +16,9 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;
 
-GAME_PLAYER_DISABLED    = 0
-GAME_PLAYER_LIVE        = 1
-GAME_PLAYER_DESTROYING  = 2
+GAME_STATE_DISABLED     = 0
+GAME_STATE_LIVE         = 1
+GAME_STATE_DESTROYING   = 2
 
 GAME_SHOT_COUNT_MAX     = 3
 

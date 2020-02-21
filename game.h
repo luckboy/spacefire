@@ -20,9 +20,9 @@
 
 #include "levels.h"
 
-#define GAME_PLAYER_DISABLED    0
-#define GAME_PLAYER_LIVE        1
-#define GAME_PLAYER_DESTROYING  2
+#define GAME_STATE_DISABLED     0
+#define GAME_STATE_LIVE         1
+#define GAME_STATE_DESTROYING   2
 
 #define GAME_SHOT_COUNT_MAX     3
 

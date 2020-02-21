@@ -144,7 +144,7 @@ L0402:  rts
         sta SPRITE_PTRS1 + 0
         sta SPRITE_PTRS2 + 0
         lda _player + player::state
-        cmp #GAME_PLAYER_DESTROYING
+        cmp #GAME_STATE_DESTROYING
         beq L0501
         lda #$01 ; white
         jmp L0502
@@ -860,19 +860,19 @@ L1006:  rts
 
 .proc _game_change_player_state
         lda _player + player::state
-        cmp #GAME_PLAYER_LIVE
+        cmp #GAME_STATE_LIVE
         bne L1101
         lda _sprite_bg_coll
         and #$01
         beq L1102
-        lda #GAME_PLAYER_DESTROYING
+        lda #GAME_STATE_DESTROYING
         sta _player + player::state
         lda _player + player::start_explosion_sprite
         sta _player + player::sprite
 L1102:  lda #1
         rts
 L1101:  lda _player + player::state
-        cmp #GAME_PLAYER_DESTROYING
+        cmp #GAME_STATE_DESTROYING
         bne L1103
         inc _player + player::sprite
         lda _player + player::sprite

@@ -23,7 +23,7 @@
 #include "levels.h"
 #include "util.h"
 
-#define SHOT_INTERVAL   ((40 * 8 - 2 * 8 - 24 + 23) / 24 + 2) / 3
+#define SHOOTING_INTERVAL       ((40 * 8 - 2 * 8 - 24 + 23) / 24 + 2) / 3
 
 unsigned char level_pos;
 unsigned char block_pos;
@@ -47,7 +47,7 @@ void finalize_game(void) {}
 static void set_level(void)
 {
   unsigned char i;
-  player.state = GAME_PLAYER_LIVE;
+  player.state = GAME_STATE_LIVE;
   player.x = SPRITE_X_OFFSET + 8;
   player.y = SPRITE_Y_OFFSET + 11 * 8 - (24 >> 1);
   player.x_steps[0] = 2;
@@ -148,10 +148,10 @@ static void draw_level(void)
 static char play_level(void)
 {
   static char is_passed;
-  static unsigned char shot_count;
+  static unsigned char shooting_count;
   static char is_shot;
   is_passed = 1;
-  shot_count = 0;
+  shooting_count = 0;
   is_shot = 0;
   SEI();
   while(1) {
@@ -160,28 +160,28 @@ static char play_level(void)
     game_scroll_screen();
     while(VIC.rasterline != RASTER_OFFSET - 4);
     port_a = CIA1.pra;
-    if(player.state == GAME_PLAYER_LIVE) {
+    if(player.state == GAME_STATE_LIVE) {
       if((port_a & 0x01) == 0) game_move_player_up();
       if((port_a & 0x02) == 0) game_move_player_down();
       if((port_a & 0x04) == 0) game_move_player_left();
       if((port_a & 0x08) == 0) game_move_player_right();
     }
     if(!game_move_player()) {
-      is_passed = (player.state == GAME_PLAYER_LIVE);
+      is_passed = (player.state == GAME_STATE_LIVE);
       break;
     }
     game_move_shots();
-    if(player.state == GAME_PLAYER_LIVE) {
+    if(player.state == GAME_STATE_LIVE) {
       if((port_a & 0x10) == 0) {
-        if(shot_count == 0) {
+        if(shooting_count == 0) {
           game_player_shoot();
           is_shot = 1;
         }
       }
     }
-    if(is_shot)shot_count++;
-    if(shot_count >= SHOT_INTERVAL) {
-      shot_count = 0;
+    if(is_shot) shooting_count++;
+    if(shooting_count >= SHOOTING_INTERVAL) {
+      shooting_count = 0;
       is_shot = 0;
     }
     game_set_player_sprite();
