@@ -69,6 +69,9 @@ Ltab_bit_shift_6:
 Ltab_bit_shift_7:
         .byte (0 << 7), (1 << 7)
 
+Ltab_state_colors:
+        .byte $01, $01, $07
+        
         .code
 
 .proc _game_move_player_up
@@ -143,13 +146,9 @@ L0402:  rts
         lda _player + player::sprite
         sta SPRITE_PTRS1 + 0
         sta SPRITE_PTRS2 + 0
-        lda _player + player::state
-        cmp #GAME_STATE_DESTROYING
-        beq L0501
-        lda #$01 ; white
-        jmp L0502
-L0501:  lda #$07 ; yellow
-L0502:  sta VIC_SPR0_COLOR
+        ldx _player + player::state
+        lda Ltab_state_colors, x
+        sta VIC_SPR0_COLOR
         rts
 .endproc
 
