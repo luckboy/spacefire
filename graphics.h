@@ -34,7 +34,7 @@
 #define SPRITE_PTRS     SPRITE_PTRS1
 #define CHARS           ((unsigned char *) 0x6800)
 #define SPRITES         ((unsigned char *) 0x7000)
-#define SPRITE_COUNT    18
+#define SPRITE_COUNT    26
 
 extern const char petscii_chars[8 * 64];
 extern const char level_chars[8 * 64];
