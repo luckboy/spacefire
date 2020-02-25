@@ -33,27 +33,27 @@ struct enemy_desc enemy_descs[ENEMY_DESC_COUNT] = {
     no_steps,
     1,
     (((unsigned) (SPRITES + 64 * 18)) - (VIC_BANK << 14)) >> 6,
-    10
+    0x10
   },
   {
     0,
     steps,
     24,
     (((unsigned) (SPRITES + 64 * 19)) - (VIC_BANK << 14)) >> 6,
-    20
+    0x20
   },
   {
     2,
     no_steps,
     1,
     (((unsigned) (SPRITES + 64 * 20)) - (VIC_BANK << 14)) >> 6,
-    30
+    0x30
   },
   {
     2,
     steps,
     24,
     (((unsigned) (SPRITES + 64 * 21)) - (VIC_BANK << 14)) >> 6,
-    40
+    0x40
   }
 };
