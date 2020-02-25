@@ -27,18 +27,43 @@
         .export _game_set_shot_sprites
         .export _game_change_player_state
         .export _game_change_shot_states
+        .export _game_move_enemies_0_3
+        .export _game_move_enemies_4_7
+        .export _game_move_enemies_8_11
+        .export _game_change_enemy_states_0_3
+        .export _game_change_enemy_states_4_7
+        .export _game_change_enemy_states_8_11
+        .export _game_add_enemy_points_0_3
+        .export _game_add_enemy_points_4_7
+        .export _game_add_enemy_points_8_11
+        .export _game_set_enemy_sprites_0_3
+        .export _game_set_enemy_sprites_4_7
+        .export _game_set_enemy_sprites_8_11
+        .export _game_alloc_enemy1
+        .export _game_alloc_enemy2
+        .export _game_alloc_enemy3
+        .export _game_display_score
         .import _level_pos
         .import _block_pos
         .import _scroll_pos
         .import _is_scroll
+        .import _is_scroll2
         .import _sprite_bg_coll
+        .import _sprite_coll1
+        .import _sprite_coll2
+        .import _sprite_coll3        
         .import _current_level
         .import _player
         .import _shots
         .import _shot_alloc_index
+        .import _enemies
+        .import _enemy_alloc_indices
+        .import _enemy_explosion
+        .import _enemy_descs
         .importzp tmp1, ptr1
         
         .include "c64.inc"
+        .include "enemy_descs.inc"
         .include "game.inc"
         .include "graphics.inc"
         .include "levels.inc"
@@ -49,6 +74,11 @@ PLAYER_Y_MIN = SPRITE_Y_OFFSET
 PLAYER_Y_MAX = SPRITE_Y_OFFSET + 22 * 8 - 22
 PASSING_PLAYER_X_MAX = SPRITE_X_OFFSET + 40 * 8 - 8
 SHOT_X_MAX = SPRITE_X_OFFSET + 40 * 8 - 8
+ENEMY_X_MIN = SPRITE_X_OFFSET - 24 + 8
+ENEMY_X_MAX = SPRITE_X_OFFSET + 40 * 8
+ENEMY_Y1 = SPRITE_Y_OFFSET + 12 + ((5 * 8) >> 1) - (22 >> 1)
+ENEMY_Y2 = SPRITE_Y_OFFSET + 12 + 5 * 8 + 16 + ((5 * 8) >> 1) - (22 >> 1)
+ENEMY_Y3 = SPRITE_Y_OFFSET + 12 + 5 * 8 + 16 + 5 * 8 + 16 + ((5 * 8) >> 1) - (22 >> 1)
 
         .rodata
         
@@ -169,6 +199,15 @@ Ltab_last_xs:
         sta ptr1 + 1
         lda (ptr1), y
         bne L06move_screen
+        lda #2
+        cmp _scroll_pos
+        bcs L06no_scroll2               ; !(2 < scroll_pos) -> !(scroll_pos > 2)  
+        lda #1
+        jmp L06set_scroll2_flag
+L06no_scroll2:
+        lda #0
+L06set_scroll2_flag:
+        sta _is_scroll2
         lda _scroll_pos
         beq L06no_scroll
         dec _scroll_pos
@@ -653,6 +692,7 @@ L06scroll_start:
 L06set_scroll2:
         lda #1
         sta _is_scroll
+        sta _is_scroll2
         lda #$d0
         ora _scroll_pos
         sta VIC_CTRL2
@@ -802,8 +842,8 @@ L0907:  rts
         sta SPRITE_PTRS2 + 1
         lda #$07 ; yellow
         sta VIC_SPR1_COLOR
-L1001:  jmp L1002
-        lda VIC_SPR_ENA
+        jmp L1002
+L1001:  lda VIC_SPR_ENA
         and #$fd
         sta VIC_SPR_ENA
         ; 2
@@ -862,6 +902,9 @@ L1006:  rts
         cmp #GAME_STATE_LIVE
         bne L1101
         lda _sprite_bg_coll
+        ora _sprite_coll1
+        ora _sprite_coll2
+        ora _sprite_coll3
         and #$01
         beq L1102
         lda #GAME_STATE_DESTROYING
@@ -884,26 +927,1518 @@ L1103:  lda #0
 .endproc
 
 .proc _game_change_shot_states
+        lda _sprite_bg_coll
+        ora _sprite_coll1
+        ora _sprite_coll2
+        ora _sprite_coll3
+        sta tmp1
         lda _shots + shot::is_enabled + .sizeof(shot) * 0
         beq L1201
-        lda _sprite_bg_coll
+        lda tmp1
         and #$02
         beq L1201
         lda #0
         sta _shots + shot::is_enabled + .sizeof(shot) * 0
 L1201:  lda _shots + shot::is_enabled + .sizeof(shot) * 1
         beq L1202
-        lda _sprite_bg_coll
+        lda tmp1
         and #$04
         beq L1202
         lda #0
         sta _shots + shot::is_enabled + .sizeof(shot) * 1
 L1202:  lda _shots + shot::is_enabled + .sizeof(shot) * 2
         beq L1203
-        lda _sprite_bg_coll
+        lda tmp1
         and #$08
         beq L1203
         lda #0
         sta _shots + shot::is_enabled + .sizeof(shot) * 2
 L1203:  rts
+.endproc
+
+.proc _game_move_enemies_0_3
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 0
+        cmp #GAME_STATE_DISABLED
+        beq L1301
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 0 + 1
+        bne L1302
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 0
+L1302:  bcs L1303
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 0
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 0, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 0
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 0 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 0 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 0
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 0
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 0 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 0
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 0
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 0
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 0
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 0
+        bcc L1301
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 0
+        jmp L1301
+L1303:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 0
+        ; 2
+L1301:  lda _enemies + enemy::state + .sizeof(enemy) * 1
+        cmp #GAME_STATE_DISABLED
+        beq L1304
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 1 + 1
+        bne L1305
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 1
+L1305:  bcs L1306
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 1
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 1, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 1
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 1 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 1 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 1
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 1 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 1
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 1
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 1
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 1
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 1
+        bcc L1304
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 1
+        jmp L1304
+L1306:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 1
+        ; 3
+L1304:  lda _enemies + enemy::state + .sizeof(enemy) * 2
+        cmp #GAME_STATE_DISABLED
+        beq L1307
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 2 + 1
+        bne L1308
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 2
+L1308:  bcs L1309
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 2
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 2, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 2
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 2 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 2 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 2
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 2
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 2 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 2
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 2
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 2
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 2
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 2
+        bcc L1307
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 2
+        jmp L1307
+L1309:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 2
+        ; 4
+L1307:  lda _enemies + enemy::state + .sizeof(enemy) * 3
+        cmp #GAME_STATE_DISABLED
+        beq L1310
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 3 + 1
+        bne L1311
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 3
+L1311:  bcs L1312
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 3
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 3, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 3
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 3 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 3 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 3
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 3
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 3 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 3
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 3
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 3
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 3
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 3
+        bcc L1310
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 3
+        jmp L1310
+L1312:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 3
+L1310:  rts
+.endproc
+
+.proc _game_move_enemies_4_7
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 4
+        cmp #GAME_STATE_DISABLED
+        beq L1401
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 4 + 1
+        bne L1402
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 4
+L1402:  bcs L1403
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 4
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 4, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 4
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 4 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 4 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 4
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 4
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 4 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 4
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 4
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 4
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 4
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 4
+        bcc L1401
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 4
+        jmp L1401
+L1403:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 4
+        ; 2
+L1401:  lda _enemies + enemy::state + .sizeof(enemy) * 5
+        cmp #GAME_STATE_DISABLED
+        beq L1404
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 5 + 1
+        bne L1405
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 5
+L1405:  bcs L1406
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 5
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 5, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 5
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 5 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 5 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 5
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 5
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 5 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 5
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 5
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 5
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 5
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 5
+        bcc L1404
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 5
+        jmp L1404
+L1406:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 5
+        ; 3
+L1404:  lda _enemies + enemy::state + .sizeof(enemy) * 6
+        cmp #GAME_STATE_DISABLED
+        beq L1407
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 6 + 1
+        bne L1408
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 6
+L1408:  bcs L1409
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 6
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 6, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 6
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 6 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 6 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 6
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 6
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 6 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 6
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 6
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 6
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 6
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 6
+        bcc L1407
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 6
+        jmp L1407
+L1409:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 6
+        ; 4
+L1407:  lda _enemies + enemy::state + .sizeof(enemy) * 7
+        cmp #GAME_STATE_DISABLED
+        beq L1410
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 7 + 1
+        bne L1411
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 7
+L1411:  bcs L1412
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 7
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 7, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 7
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 7 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 7 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 7
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 7
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 7 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 7
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 7
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 7
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 7
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 7
+        bcc L1410
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 7
+        jmp L1410
+L1412:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 7
+L1410:  rts
+.endproc
+
+.proc _game_move_enemies_8_11
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 8
+        cmp #GAME_STATE_DISABLED
+        beq L1501
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 8 + 1
+        bne L1502
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 8
+L1502:  bcs L1503
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 8
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 8, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 8
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 8 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 8 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 8
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 8
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 8 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 8
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 8
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 8
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 8
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 8
+        bcc L1501
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 8
+        jmp L1501
+L1503:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 8
+        ; 2
+L1501:  lda _enemies + enemy::state + .sizeof(enemy) * 9
+        cmp #GAME_STATE_DISABLED
+        beq L1504
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 9 + 1
+        bne L1505
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 9
+L1505:  bcs L1506
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 9
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 9, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 9
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 9 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 9 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 9
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 9
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 9 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 9
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 9
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 9
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 9
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 9
+        bcc L1504
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 9
+        jmp L1504
+L1506:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 9
+        ; 3
+L1504:  lda _enemies + enemy::state + .sizeof(enemy) * 10
+        cmp #GAME_STATE_DISABLED
+        beq L1507
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 10 + 1
+        bne L1508
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 10
+L1508:  bcs L1509
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 10
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 10, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 10
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 10 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 10 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 10
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 10
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 10 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 10
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 10
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 10
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 10
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 10
+        bcc L1507
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 10
+        jmp L1507
+L1509:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 10
+        ; 4
+L1507:  lda _enemies + enemy::state + .sizeof(enemy) * 11
+        cmp #GAME_STATE_DISABLED
+        beq L1510
+        lda #>ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 11 + 1
+        bne L1511
+        lda #<ENEMY_X_MIN
+        cmp _enemies + enemy::x_coord + .sizeof(enemy) * 11
+L1511:  bcs L1512
+        ldx _is_scroll2
+        sec
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 11
+        sbc _enemies + enemy::x_steps + .sizeof(enemy) * 11, x
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 11
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 11 + 1
+        sbc #0
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 11 + 1
+        ldy _enemies + enemy::y_step_index + .sizeof(enemy) * 11
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 11
+        sta ptr1
+        lda _enemies + enemy::y_steps + .sizeof(enemy) * 11 + 1
+        sta ptr1 + 1
+        clc
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 11
+        adc (ptr1), y
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 11
+        inc _enemies + enemy::y_step_index + .sizeof(enemy) * 11
+        lda _enemies + enemy::y_step_index + .sizeof(enemy) * 11
+        cmp _enemies + enemy::y_step_count + .sizeof(enemy) * 11
+        bcc L1510
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 11
+        jmp L1510
+L1512:  lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 11
+L1510:  rts
+.endproc
+
+.proc _game_change_enemy_states_0_3
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 0
+        cmp #GAME_STATE_LIVE
+        bne L1601
+        lda _sprite_coll1
+        and #$10
+        beq L1602
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 0
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 0
+        jmp L1602
+L1601:  lda _enemies + enemy::state + .sizeof(enemy) * 0
+        cmp #GAME_STATE_DESTROYING
+        bne L1602
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 0
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 0
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1602
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 0
+        ; 2
+L1602:  lda _enemies + enemy::state + .sizeof(enemy) * 1
+        cmp #GAME_STATE_LIVE
+        bne L1603
+        lda _sprite_coll1
+        and #$20
+        beq L1604
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 1
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 1
+        jmp L1604
+L1603:  lda _enemies + enemy::state + .sizeof(enemy) * 1
+        cmp #GAME_STATE_DESTROYING
+        bne L1604
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 1
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 1
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1604
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 1
+        ; 3
+L1604:  lda _enemies + enemy::state + .sizeof(enemy) * 2
+        cmp #GAME_STATE_LIVE
+        bne L1605
+        lda _sprite_coll1
+        and #$40
+        beq L1606
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 2
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 2
+        jmp L1606
+L1605:  lda _enemies + enemy::state + .sizeof(enemy) * 2
+        cmp #GAME_STATE_DESTROYING
+        bne L1606
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 2
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 2
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1606
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 2
+        ; 4
+L1606:  lda _enemies + enemy::state + .sizeof(enemy) * 3
+        cmp #GAME_STATE_LIVE
+        bne L1607
+        lda _sprite_coll1
+        and #$80
+        beq L1608
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 3
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 3
+        jmp L1608
+L1607:  lda _enemies + enemy::state + .sizeof(enemy) * 3
+        cmp #GAME_STATE_DESTROYING
+        bne L1608
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 3
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 3
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1608
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 3
+L1608:  rts
+.endproc
+
+.proc _game_change_enemy_states_4_7
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 4
+        cmp #GAME_STATE_LIVE
+        bne L1701
+        lda _sprite_coll2
+        and #$10
+        beq L1702
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 4
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 4
+        jmp L1702
+L1701:  lda _enemies + enemy::state + .sizeof(enemy) * 4
+        cmp #GAME_STATE_DESTROYING
+        bne L1702
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 4
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 4
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1702
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 4
+        ; 2
+L1702:  lda _enemies + enemy::state + .sizeof(enemy) * 5
+        cmp #GAME_STATE_LIVE
+        bne L1703
+        lda _sprite_coll2
+        and #$20
+        beq L1704
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 5
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 5
+        jmp L1704
+L1703:  lda _enemies + enemy::state + .sizeof(enemy) * 5
+        cmp #GAME_STATE_DESTROYING
+        bne L1704
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 5
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 5
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1704
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 5
+        ; 3
+L1704:  lda _enemies + enemy::state + .sizeof(enemy) * 6
+        cmp #GAME_STATE_LIVE
+        bne L1705
+        lda _sprite_coll2
+        and #$40
+        beq L1706
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 6
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 6
+        jmp L1706
+L1705:  lda _enemies + enemy::state + .sizeof(enemy) * 6
+        cmp #GAME_STATE_DESTROYING
+        bne L1706
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 6
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 6
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1706
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 6
+        ; 4
+L1706:  lda _enemies + enemy::state + .sizeof(enemy) * 7
+        cmp #GAME_STATE_LIVE
+        bne L1707
+        lda _sprite_coll2
+        and #$80
+        beq L1708
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 7
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 7
+        jmp L1708
+L1707:  lda _enemies + enemy::state + .sizeof(enemy) * 7
+        cmp #GAME_STATE_DESTROYING
+        bne L1708
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 7
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 7
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1708
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 7
+L1708:  rts
+.endproc
+
+.proc _game_change_enemy_states_8_11
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 8
+        cmp #GAME_STATE_LIVE
+        bne L1801
+        lda _sprite_coll1
+        and #$10
+        beq L1802
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 8
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 8
+        jmp L1802
+L1801:  lda _enemies + enemy::state + .sizeof(enemy) * 8
+        cmp #GAME_STATE_DESTROYING
+        bne L1802
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 8
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 8
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1802
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 8
+        ; 2
+L1802:  lda _enemies + enemy::state + .sizeof(enemy) * 9
+        cmp #GAME_STATE_LIVE
+        bne L1803
+        lda _sprite_coll1
+        and #$20
+        beq L1804
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 9
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 9
+        jmp L1804
+L1803:  lda _enemies + enemy::state + .sizeof(enemy) * 9
+        cmp #GAME_STATE_DESTROYING
+        bne L1804
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 9
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 9
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1804
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 9
+        ; 3
+L1804:  lda _enemies + enemy::state + .sizeof(enemy) * 10
+        cmp #GAME_STATE_LIVE
+        bne L1805
+        lda _sprite_coll1
+        and #$40
+        beq L1806
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 10
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 10
+        jmp L1806
+L1805:  lda _enemies + enemy::state + .sizeof(enemy) * 10
+        cmp #GAME_STATE_DESTROYING
+        bne L1806
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 10
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 10
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1806
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 10
+        ; 4
+L1806:  lda _enemies + enemy::state + .sizeof(enemy) * 11
+        cmp #GAME_STATE_LIVE
+        bne L1807
+        lda _sprite_coll1
+        and #$80
+        beq L1808
+        lda #GAME_STATE_DESTROYING
+        sta _enemies + enemy::state + .sizeof(enemy) * 11
+        lda _enemy_explosion + enemy_explosion::start_explosion_sprite
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 11
+        jmp L1808
+L1807:  lda _enemies + enemy::state + .sizeof(enemy) * 11
+        cmp #GAME_STATE_DESTROYING
+        bne L1808
+        inc _enemies + enemy::sprite + .sizeof(enemy) * 11
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 11
+        cmp _enemy_explosion + enemy_explosion::end_explosion_sprite
+        bcc L1808
+        lda #GAME_STATE_DISABLED
+        sta _enemies + enemy::state + .sizeof(enemy) * 11
+L1808:  rts
+.endproc
+
+.proc _game_add_enemy_points_0_3
+        lda _player + player::state
+        cmp #GAME_STATE_LIVE
+        beq L19add
+        jmp L19no_add
+L19add: sed
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 0
+        cmp #GAME_STATE_DESTROYING
+        bne L1901
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 0
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L1901
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 0
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+        ; 2
+L1901:  lda _enemies + enemy::state + .sizeof(enemy) * 1
+        cmp #GAME_STATE_DESTROYING
+        bne L1902
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 1
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L1902
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 1
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+        ; 3
+L1902:  lda _enemies + enemy::state + .sizeof(enemy) * 2
+        cmp #GAME_STATE_DESTROYING
+        bne L1903
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 2
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L1903
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 2
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+        ; 4
+L1903:  lda _enemies + enemy::state + .sizeof(enemy) * 3
+        cmp #GAME_STATE_DESTROYING
+        bne L1904
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 3
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L1904
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 3
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+L1904:  cld
+L19no_add:
+        rts
+.endproc
+
+.proc _game_add_enemy_points_4_7
+        lda _player + player::state
+        cmp #GAME_STATE_LIVE
+        beq L20add
+        jmp L20no_add
+L20add: sed
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 4
+        cmp #GAME_STATE_DESTROYING
+        bne L2001
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 4
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L2001
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 4
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+        ; 2
+L2001:  lda _enemies + enemy::state + .sizeof(enemy) * 5
+        cmp #GAME_STATE_DESTROYING
+        bne L2002
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 5
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L2002
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 5
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+        ; 3
+L2002:  lda _enemies + enemy::state + .sizeof(enemy) * 6
+        cmp #GAME_STATE_DESTROYING
+        bne L2003
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 6
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L2003
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 6
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+        ; 4
+L2003:  lda _enemies + enemy::state + .sizeof(enemy) * 7
+        cmp #GAME_STATE_DESTROYING
+        bne L2004
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 7
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L2004
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 7
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+L2004:  cld
+L20no_add:
+        rts
+.endproc
+
+.proc _game_add_enemy_points_8_11
+        lda _player + player::state
+        cmp #GAME_STATE_LIVE
+        beq L21add
+        jmp L21no_add
+L21add: sed
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 8
+        cmp #GAME_STATE_DESTROYING
+        bne L2101
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 8
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L2101
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 8
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+        ; 2
+L2101:  lda _enemies + enemy::state + .sizeof(enemy) * 9
+        cmp #GAME_STATE_DESTROYING
+        bne L2102
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 9
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L2102
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 9
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+        ; 3
+L2102:  lda _enemies + enemy::state + .sizeof(enemy) * 10
+        cmp #GAME_STATE_DESTROYING
+        bne L2103
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 10
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L2103
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 10
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+        ; 4
+L2103:  lda _enemies + enemy::state + .sizeof(enemy) * 11
+        cmp #GAME_STATE_DESTROYING
+        bne L2104
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 11
+        cmp _enemy_explosion + enemy_explosion::start_explosion_sprite
+        bne L2104
+        clc
+        lda _player + player::score
+        adc _enemies + enemy::points + .sizeof(enemy) * 11
+        sta _player + player::score
+        lda _player + player::score + 1
+        adc #0
+        sta _player + player::score + 1
+        lda _player + player::score + 2
+        adc #0
+        sta _player + player::score + 2
+L2104:  cld
+L21no_add:
+        rts
+.endproc
+
+.proc _game_set_enemy_sprites_0_3
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 0
+        cmp #GAME_STATE_DISABLED
+        beq L2201
+        lda VIC_SPR_ENA
+        ora #$10
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 0
+        sta VIC_SPR4_X
+        lda VIC_SPR_HI_X
+        and #$ef
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 0 + 1
+        ora Ltab_bit_shift_4, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 0
+        sta VIC_SPR4_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 0
+        sta SPRITE_PTRS1 + 4
+        sta SPRITE_PTRS2 + 4
+        ldx _enemies + enemy::state + .sizeof(enemy) * 0
+        lda Ltab_state_colors, x
+        sta VIC_SPR4_COLOR
+        jmp L2202
+L2201:  lda VIC_SPR_ENA
+        and #$ef
+        sta VIC_SPR_ENA
+        ; 2
+L2202:  lda _enemies + enemy::state + .sizeof(enemy) * 1
+        cmp #GAME_STATE_DISABLED
+        beq L2203
+        lda VIC_SPR_ENA
+        ora #$20
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 1
+        sta VIC_SPR5_X
+        lda VIC_SPR_HI_X
+        and #$df
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 1 + 1
+        ora Ltab_bit_shift_5, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 1
+        sta VIC_SPR5_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 1
+        sta SPRITE_PTRS1 + 5
+        sta SPRITE_PTRS2 + 5
+        ldx _enemies + enemy::state + .sizeof(enemy) * 1
+        lda Ltab_state_colors, x
+        sta VIC_SPR5_COLOR
+        jmp L2204
+L2203:  lda VIC_SPR_ENA
+        and #$df
+        sta VIC_SPR_ENA
+        ; 3
+L2204:  lda _enemies + enemy::state + .sizeof(enemy) * 2
+        cmp #GAME_STATE_DISABLED
+        beq L2205
+        lda VIC_SPR_ENA
+        ora #$40
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 2
+        sta VIC_SPR6_X
+        lda VIC_SPR_HI_X
+        and #$bf
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 2 + 1
+        ora Ltab_bit_shift_6, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 2
+        sta VIC_SPR6_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 2
+        sta SPRITE_PTRS1 + 6
+        sta SPRITE_PTRS2 + 6
+        ldx _enemies + enemy::state + .sizeof(enemy) * 2
+        lda Ltab_state_colors, x
+        sta VIC_SPR6_COLOR
+        jmp L2206
+L2205:  lda VIC_SPR_ENA
+        and #$bf
+        sta VIC_SPR_ENA
+        ; 4
+L2206:  lda _enemies + enemy::state + .sizeof(enemy) * 3
+        cmp #GAME_STATE_DISABLED
+        beq L2207
+        lda VIC_SPR_ENA
+        ora #$80
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 3
+        sta VIC_SPR7_X
+        lda VIC_SPR_HI_X
+        and #$7f
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 3 + 1
+        ora Ltab_bit_shift_7, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 3
+        sta VIC_SPR7_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 3
+        sta SPRITE_PTRS1 + 7
+        sta SPRITE_PTRS2 + 7
+        ldx _enemies + enemy::state + .sizeof(enemy) * 3
+        lda Ltab_state_colors, x
+        sta VIC_SPR7_COLOR
+        jmp L2208
+L2207:  lda VIC_SPR_ENA
+        and #$7f
+        sta VIC_SPR_ENA
+L2208:  rts
+.endproc
+
+.proc _game_set_enemy_sprites_4_7
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 4
+        cmp #GAME_STATE_DISABLED
+        beq L2301
+        lda VIC_SPR_ENA
+        ora #$10
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 4
+        sta VIC_SPR4_X
+        lda VIC_SPR_HI_X
+        and #$ef
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 4 + 1
+        ora Ltab_bit_shift_4, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 4
+        sta VIC_SPR4_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 4
+        sta SPRITE_PTRS1 + 4
+        sta SPRITE_PTRS2 + 4
+        ldx _enemies + enemy::state + .sizeof(enemy) * 4
+        lda Ltab_state_colors, x
+        sta VIC_SPR4_COLOR
+        jmp L2302
+L2301:  lda VIC_SPR_ENA
+        and #$ef
+        sta VIC_SPR_ENA
+        ; 2
+L2302:  lda _enemies + enemy::state + .sizeof(enemy) * 5
+        cmp #GAME_STATE_DISABLED
+        beq L2303
+        lda VIC_SPR_ENA
+        ora #$20
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 5
+        sta VIC_SPR5_X
+        lda VIC_SPR_HI_X
+        and #$df
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 5 + 1
+        ora Ltab_bit_shift_5, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 5
+        sta VIC_SPR5_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 5
+        sta SPRITE_PTRS1 + 5
+        sta SPRITE_PTRS2 + 5
+        ldx _enemies + enemy::state + .sizeof(enemy) * 5
+        lda Ltab_state_colors, x
+        sta VIC_SPR5_COLOR
+        jmp L2304
+L2303:  lda VIC_SPR_ENA
+        and #$df
+        sta VIC_SPR_ENA
+        ; 3
+L2304:  lda _enemies + enemy::state + .sizeof(enemy) * 6
+        cmp #GAME_STATE_DISABLED
+        beq L2305
+        lda VIC_SPR_ENA
+        ora #$40
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 6
+        sta VIC_SPR6_X
+        lda VIC_SPR_HI_X
+        and #$bf
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 6 + 1
+        ora Ltab_bit_shift_6, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 6
+        sta VIC_SPR6_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 6
+        sta SPRITE_PTRS1 + 6
+        sta SPRITE_PTRS2 + 6
+        ldx _enemies + enemy::state + .sizeof(enemy) * 6
+        lda Ltab_state_colors, x
+        sta VIC_SPR6_COLOR
+        jmp L2306
+L2305:  lda VIC_SPR_ENA
+        and #$bf
+        sta VIC_SPR_ENA
+        ; 4
+L2306:  lda _enemies + enemy::state + .sizeof(enemy) * 7
+        cmp #GAME_STATE_DISABLED
+        beq L2307
+        lda VIC_SPR_ENA
+        ora #$80
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 7
+        sta VIC_SPR7_X
+        lda VIC_SPR_HI_X
+        and #$7f
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 7 + 1
+        ora Ltab_bit_shift_7, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 7
+        sta VIC_SPR7_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 7
+        sta SPRITE_PTRS1 + 7
+        sta SPRITE_PTRS2 + 7
+        ldx _enemies + enemy::state + .sizeof(enemy) * 7
+        lda Ltab_state_colors, x
+        sta VIC_SPR7_COLOR
+        jmp L2308
+L2307:  lda VIC_SPR_ENA
+        and #$7f
+        sta VIC_SPR_ENA
+L2308:  rts
+.endproc
+
+.proc _game_set_enemy_sprites_8_11
+        ; 1
+        lda _enemies + enemy::state + .sizeof(enemy) * 8
+        cmp #GAME_STATE_DISABLED
+        beq L2401
+        lda VIC_SPR_ENA
+        ora #$10
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 8
+        sta VIC_SPR4_X
+        lda VIC_SPR_HI_X
+        and #$ef
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 8 + 1
+        ora Ltab_bit_shift_4, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 8
+        sta VIC_SPR4_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 8
+        sta SPRITE_PTRS1 + 4
+        sta SPRITE_PTRS2 + 4
+        ldx _enemies + enemy::state + .sizeof(enemy) * 8
+        lda Ltab_state_colors, x
+        sta VIC_SPR4_COLOR
+        jmp L2402
+L2401:  lda VIC_SPR_ENA
+        and #$ef
+        sta VIC_SPR_ENA
+        ; 2
+L2402:  lda _enemies + enemy::state + .sizeof(enemy) * 9
+        cmp #GAME_STATE_DISABLED
+        beq L2403
+        lda VIC_SPR_ENA
+        ora #$20
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 9
+        sta VIC_SPR5_X
+        lda VIC_SPR_HI_X
+        and #$df
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 9 + 1
+        ora Ltab_bit_shift_5, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 9
+        sta VIC_SPR5_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 9
+        sta SPRITE_PTRS1 + 5
+        sta SPRITE_PTRS2 + 5
+        ldx _enemies + enemy::state + .sizeof(enemy) * 9
+        lda Ltab_state_colors, x
+        sta VIC_SPR5_COLOR
+        jmp L2404
+L2403:  lda VIC_SPR_ENA
+        and #$df
+        sta VIC_SPR_ENA
+        ; 3
+L2404:  lda _enemies + enemy::state + .sizeof(enemy) * 10
+        cmp #GAME_STATE_DISABLED
+        beq L2405
+        lda VIC_SPR_ENA
+        ora #$40
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 10
+        sta VIC_SPR6_X
+        lda VIC_SPR_HI_X
+        and #$bf
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 10 + 1
+        ora Ltab_bit_shift_6, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 10
+        sta VIC_SPR6_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 10
+        sta SPRITE_PTRS1 + 6
+        sta SPRITE_PTRS2 + 6
+        ldx _enemies + enemy::state + .sizeof(enemy) * 10
+        lda Ltab_state_colors, x
+        sta VIC_SPR6_COLOR
+        jmp L2406
+L2405:  lda VIC_SPR_ENA
+        and #$bf
+        sta VIC_SPR_ENA
+        ; 4
+L2406:  lda _enemies + enemy::state + .sizeof(enemy) * 11
+        cmp #GAME_STATE_DISABLED
+        beq L2407
+        lda VIC_SPR_ENA
+        ora #$80
+        sta VIC_SPR_ENA
+        lda _enemies + enemy::x_coord + .sizeof(enemy) * 11
+        sta VIC_SPR7_X
+        lda VIC_SPR_HI_X
+        and #$7f
+        ldx _enemies + enemy::x_coord + .sizeof(enemy) * 11 + 1
+        ora Ltab_bit_shift_7, x
+        sta VIC_SPR_HI_X
+        lda _enemies + enemy::y_coord + .sizeof(enemy) * 11
+        sta VIC_SPR7_Y
+        lda _enemies + enemy::sprite + .sizeof(enemy) * 11
+        sta SPRITE_PTRS1 + 7
+        sta SPRITE_PTRS2 + 7
+        ldx _enemies + enemy::state + .sizeof(enemy) * 11
+        lda Ltab_state_colors, x
+        sta VIC_SPR7_COLOR
+        jmp L2408
+L2407:  lda VIC_SPR_ENA
+        and #$7f
+        sta VIC_SPR_ENA
+L2408:  rts
+.endproc
+
+        .rodata
+
+Ltab_enemy_desc_xs:
+        .byte .sizeof(enemy_desc) * 0
+        .byte .sizeof(enemy_desc) * 1
+        .byte .sizeof(enemy_desc) * 2
+        .byte .sizeof(enemy_desc) * 3
+
+Ltab_enemy_xs:
+        .byte .sizeof(enemy) * 0
+        .byte .sizeof(enemy) * 1
+        .byte .sizeof(enemy) * 2
+        .byte .sizeof(enemy) * 3
+
+        .code
+
+.proc _game_alloc_enemy1
+        lda _current_level + level::enemies + 2 * 0
+        sta ptr1
+        lda _current_level + level::enemies + 2 * 0 + 1
+        sta ptr1 + 1
+        ldy _level_pos
+        lda (ptr1), y
+        cmp #$20 ; space
+        beq L25no_alloc
+        sec
+        sbc #$31 ; 1
+        tay
+        ldx Ltab_enemy_desc_xs, y
+        ldy _enemy_alloc_indices + 0
+        lda Ltab_enemy_xs, y
+        tay
+        lda #GAME_STATE_LIVE
+        sta _enemies + enemy::state + .sizeof(enemy) * 0, y
+        lda #<ENEMY_X_MAX
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 0, y
+        lda #>ENEMY_X_MAX
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 0 + 1, y
+        lda #ENEMY_Y1
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 0, y
+        lda _enemy_descs + enemy_desc::x_step, x
+        sta _enemies + enemy::x_steps + .sizeof(enemy) * 0 + 0, y
+        clc
+        adc #2
+        sta _enemies + enemy::x_steps + .sizeof(enemy) * 0 + 1, y
+        lda _enemy_descs + enemy_desc::y_steps, x
+        sta _enemies + enemy::y_steps + .sizeof(enemy) * 0, y
+        lda _enemy_descs + enemy_desc::y_steps + 1, x
+        sta _enemies + enemy::y_steps + .sizeof(enemy) * 0 + 1, y
+        lda _enemy_descs + enemy_desc::y_step_count, x
+        sta _enemies + enemy::y_step_count + .sizeof(enemy) * 0, y
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 0, y
+        lda _enemy_descs + enemy_desc::sprite, x
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 0, y
+        lda _enemy_descs + enemy_desc::points, x
+        sta _enemies + enemy::points + .sizeof(enemy) * 0, y
+        inc _enemy_alloc_indices + 0 
+        lda _enemy_alloc_indices + 0
+        cmp #4
+        bcc L25ret                      ; !(enemy_alloc_indices[0] >= 4)
+        lda #0
+        sta _enemy_alloc_indices + 0
+L25no_alloc:
+L25ret: rts
+.endproc
+
+.proc _game_alloc_enemy2
+        lda _current_level + level::enemies + 2 * 1
+        sta ptr1
+        lda _current_level + level::enemies + 2 * 1 + 1
+        sta ptr1 + 1
+        ldy _level_pos
+        lda (ptr1), y
+        cmp #$20 ; space
+        beq L26no_alloc
+        sec
+        sbc #$31 ; 1
+        tay
+        ldx Ltab_enemy_desc_xs, y
+        ldy _enemy_alloc_indices + 1
+        lda Ltab_enemy_xs, y
+        tay
+        lda #GAME_STATE_LIVE
+        sta _enemies + enemy::state + .sizeof(enemy) * 4, y
+        lda #<ENEMY_X_MAX
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 4, y
+        lda #>ENEMY_X_MAX
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 4 + 1, y
+        lda #ENEMY_Y2
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 4, y
+        lda _enemy_descs + enemy_desc::x_step, x
+        sta _enemies + enemy::x_steps + .sizeof(enemy) * 4 + 0, y
+        clc
+        adc #2
+        sta _enemies + enemy::x_steps + .sizeof(enemy) * 4 + 1, y
+        lda _enemy_descs + enemy_desc::y_steps, x
+        sta _enemies + enemy::y_steps + .sizeof(enemy) * 4, y
+        lda _enemy_descs + enemy_desc::y_steps + 1, x
+        sta _enemies + enemy::y_steps + .sizeof(enemy) * 4 + 1, y
+        lda _enemy_descs + enemy_desc::y_step_count, x
+        sta _enemies + enemy::y_step_count + .sizeof(enemy) * 4, y
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 4, y
+        lda _enemy_descs + enemy_desc::sprite, x
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 4, y
+        lda _enemy_descs + enemy_desc::points, x
+        sta _enemies + enemy::points + .sizeof(enemy) * 4, y
+        inc _enemy_alloc_indices + 1
+        lda _enemy_alloc_indices + 1
+        cmp #4
+        bcc L26ret                      ; !(enemy_alloc_indices[1] >= 4)
+        lda #0
+        sta _enemy_alloc_indices + 1
+L26no_alloc:
+L26ret: rts
+.endproc
+
+.proc _game_alloc_enemy3
+        lda _current_level + level::enemies + 2 * 2
+        sta ptr1
+        lda _current_level + level::enemies + 2 * 2 + 1
+        sta ptr1 + 1
+        ldy _level_pos
+        lda (ptr1), y
+        cmp #$20 ; space
+        beq L27no_alloc
+        sec
+        sbc #$31 ; 1
+        tay
+        ldx Ltab_enemy_desc_xs, y
+        ldy _enemy_alloc_indices + 2
+        lda Ltab_enemy_xs, y
+        tay
+        lda #GAME_STATE_LIVE
+        sta _enemies + enemy::state + .sizeof(enemy) * 8, y
+        lda #<ENEMY_X_MAX
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 8, y
+        lda #>ENEMY_X_MAX
+        sta _enemies + enemy::x_coord + .sizeof(enemy) * 8 + 1, y
+        lda #ENEMY_Y3
+        sta _enemies + enemy::y_coord + .sizeof(enemy) * 8, y
+        lda _enemy_descs + enemy_desc::x_step, x
+        sta _enemies + enemy::x_steps + .sizeof(enemy) * 8 + 0, y
+        clc
+        adc #2
+        sta _enemies + enemy::x_steps + .sizeof(enemy) * 8 + 1, y
+        lda _enemy_descs + enemy_desc::y_steps, x
+        sta _enemies + enemy::y_steps + .sizeof(enemy) * 8, y
+        lda _enemy_descs + enemy_desc::y_steps + 1, x
+        sta _enemies + enemy::y_steps + .sizeof(enemy) * 8 + 1, y
+        lda _enemy_descs + enemy_desc::y_step_count, x
+        sta _enemies + enemy::y_step_count + .sizeof(enemy) * 8, y
+        lda #0
+        sta _enemies + enemy::y_step_index + .sizeof(enemy) * 8, y
+        lda _enemy_descs + enemy_desc::sprite, x
+        sta _enemies + enemy::sprite + .sizeof(enemy) * 8, y
+        lda _enemy_descs + enemy_desc::points, x
+        sta _enemies + enemy::points + .sizeof(enemy) * 8, y
+        inc _enemy_alloc_indices + 2
+        lda _enemy_alloc_indices + 2
+        cmp #4
+        bcc L27ret                      ; !(enemy_alloc_indices[2] >= 4)
+        lda #0
+        sta _enemy_alloc_indices + 2
+L27no_alloc:
+L27ret: rts
+.endproc
+
+.proc _game_display_score
+        lda _player + player::score
+        and #$0f
+        clc
+        adc #$30 ; 0
+        sta SCREEN1 + 40 * 23 + 34 + 5
+        sta SCREEN2 + 40 * 23 + 34 + 5
+        lda _player + player::score
+        lsr
+        lsr
+        lsr
+        lsr
+        clc
+        adc #$30 ; 0
+        sta SCREEN1 + 40 * 23 + 34 + 4
+        sta SCREEN2 + 40 * 23 + 34 + 4
+        lda _player + player::score + 1
+        and #$0f
+        clc
+        adc #$30 ; 0
+        sta SCREEN1 + 40 * 23 + 34 + 3
+        sta SCREEN2 + 40 * 23 + 34 + 3
+        lda _player + player::score + 1
+        lsr
+        lsr
+        lsr
+        lsr
+        clc
+        adc #$30 ; 0
+        sta SCREEN1 + 40 * 23 + 34 + 2
+        sta SCREEN2 + 40 * 23 + 34 + 2
+        lda _player + player::score + 2
+        and #$0f
+        clc
+        adc #$30 ; 0
+        sta SCREEN1 + 40 * 23 + 34 + 1
+        sta SCREEN2 + 40 * 23 + 34 + 1
+        lda _player + player::score + 2
+        lsr
+        lsr
+        lsr
+        lsr
+        clc
+        adc #$30 ; 0
+        sta SCREEN1 + 40 * 23 + 34 + 0
+        sta SCREEN2 + 40 * 23 + 34 + 0
+        rts
 .endproc

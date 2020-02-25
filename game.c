@@ -17,7 +17,9 @@
  */
 #include <6502.h>
 #include <c64.h>
+#include <stddef.h>
 #include <string.h>
+#include "enemy_descs.h"
 #include "game.h"
 #include "graphics.h"
 #include "levels.h"
@@ -29,8 +31,12 @@ unsigned char level_pos;
 unsigned char block_pos;
 unsigned char scroll_pos;
 char is_scroll;
+char is_scroll2;
 
 unsigned char sprite_bg_coll;
+unsigned char sprite_coll1;
+unsigned char sprite_coll2;
+unsigned char sprite_coll3;
 
 unsigned char start_level_index;
 unsigned char current_level_index;
@@ -38,15 +44,44 @@ struct level current_level;
 struct player player;
 struct shot shots[GAME_SHOT_COUNT_MAX];
 unsigned char shot_alloc_index;
+struct enemy enemies[GAME_ENEMY_COUNT_MAX];
+unsigned char enemy_alloc_indices[3];
+struct enemy_explosion enemy_explosion;
 
 void initialize_game(void)
 { start_level_index = 0; }
 
 void finalize_game(void) {}
 
+static unsigned char tab_enemy_xs[3] = {
+  SPRITE_Y_OFFSET + 12 + ((5 * 8) >> 1) - (22 >> 1),
+  SPRITE_Y_OFFSET + 12 + 5 * 8 + 16 + ((5 * 8) >> 1) - (22 >> 1),
+  SPRITE_Y_OFFSET + 12 + 5 * 8 + 16 + 5 * 8 + 16 + ((5 * 8) >> 1) - (22 >> 1)
+};
+
+static void alloc_enemy(unsigned char i, unsigned char j)
+{
+  if(current_level.enemies[i][j] != ' ') {
+    unsigned char k = current_level.enemies[i][j] - '1';
+    unsigned char l = enemy_alloc_indices[i] + i * 4;
+    enemies[l].state = GAME_STATE_LIVE;
+    enemies[l].x = SPRITE_X_OFFSET + j * 16 + 6;
+    enemies[l].y = tab_enemy_xs[i];
+    enemies[l].x_steps[0] = enemy_descs[k].x_step;
+    enemies[l].x_steps[1] = enemy_descs[k].x_step + 2;
+    enemies[l].y_steps = enemy_descs[k].y_steps;
+    enemies[l].y_step_count = enemy_descs[k].y_step_count;
+    enemies[l].y_step_index = 0;
+    enemies[l].sprite = enemy_descs[k].sprite;
+    enemies[l].points = enemy_descs[k].points;
+    enemy_alloc_indices[i]++;
+    if(enemy_alloc_indices[i] >= 4) enemy_alloc_indices[i] = 0;
+  }
+}
+
 static void set_level(void)
 {
-  unsigned char i;
+  unsigned char i, j;
   player.state = GAME_STATE_LIVE;
   player.x = SPRITE_X_OFFSET + 8;
   player.y = SPRITE_Y_OFFSET + 11 * 8 - (24 >> 1);
@@ -64,6 +99,26 @@ static void set_level(void)
     shots[i].sprite = (((unsigned) (SPRITES + 64 * 1)) - (VIC_BANK << 14)) >> 6;
   }
   shot_alloc_index = 0;
+  for(i = 0; i < GAME_ENEMY_COUNT_MAX; i++) {
+    enemies[i].state = GAME_STATE_DISABLED;
+    enemies[i].x = 0;
+    enemies[i].y = 0;
+    enemies[i].x_steps[0] = 0;
+    enemies[i].x_steps[1] = 2;
+    enemies[i].y_steps = NULL;
+    enemies[i].y_step_count = 0;
+    enemies[i].y_step_index = 0;
+    enemies[i].sprite = (((unsigned) (SPRITES + 64 * 18)) - (VIC_BANK << 14)) >> 6;
+    enemies[i].points = 0x10;
+  }
+  enemy_explosion.start_explosion_sprite = (((unsigned) (SPRITES + 64 * 22)) - (VIC_BANK << 14)) >> 6;
+  enemy_explosion.end_explosion_sprite = (((unsigned) (SPRITES + 64 * 26)) - (VIC_BANK << 14)) >> 6;
+  for(i = 0; i < 3; i++) {
+    enemy_alloc_indices[i] = 0;
+  }
+  for(i = 0; i < 3; i++) {
+    for(j = 0; j < 20; j++) alloc_enemy(i, j);
+  }
   level_pos = 20;
   block_pos = 0;
   scroll_pos = 6;
@@ -142,6 +197,40 @@ static void draw_level(void)
   VIC.spr_exp_y = 0x00;
   VIC.spr_mcolor = 0xff;
   VIC.spr0_color = COLOR_WHITE;
+  for(i = 0; i < 4; i++) {
+    if(enemies[i].state == GAME_STATE_LIVE) {
+      SPRITE_PTRS1[4 + i] = enemies[i].sprite;
+      SPRITE_PTRS2[4 + i] = enemies[i].sprite;
+    }
+  }
+  if(enemies[0].state == GAME_STATE_LIVE) {
+    VIC.spr_ena |= 0x10;
+    VIC.spr4_x = enemies[0].x;
+    VIC.spr_hi_x |= (enemies[0].x >> 8) << 4;
+    VIC.spr4_y = enemies[0].y;
+    VIC.spr4_color = COLOR_WHITE;
+  }
+  if(enemies[1].state == GAME_STATE_LIVE) {
+    VIC.spr_ena |= 0x20;
+    VIC.spr5_x = enemies[1].x;
+    VIC.spr_hi_x |= (enemies[1].x >> 8) << 5;
+    VIC.spr5_y = enemies[1].y;
+    VIC.spr5_color = COLOR_WHITE;
+  }
+  if(enemies[2].state == GAME_STATE_LIVE) {
+    VIC.spr_ena |= 0x40;
+    VIC.spr6_x = enemies[2].x;
+    VIC.spr_hi_x |= (enemies[2].x >> 8) << 6;
+    VIC.spr6_y = enemies[2].y;
+    VIC.spr6_color = COLOR_WHITE;
+  }
+  if(enemies[3].state == GAME_STATE_LIVE) {
+    VIC.spr_ena |= 0x80;
+    VIC.spr7_x = enemies[3].x;
+    VIC.spr_hi_x |= (enemies[3].x >> 8) << 7;
+    VIC.spr7_y = enemies[3].y;
+    VIC.spr7_color = COLOR_WHITE;
+  }
   VIC.ctrl1 |= 0x10;
 }
 
@@ -186,9 +275,37 @@ static char play_level(void)
     }
     game_set_player_sprite();
     game_set_shot_sprites();
+    while(VIC.rasterline != RASTER_OFFSET);
+    game_set_enemy_sprites_0_3();
+    while(VIC.rasterline != RASTER_OFFSET + 12);
+    game_move_enemies_0_3();
+    game_change_enemy_states_0_3();
+    game_add_enemy_points_0_3();
+    while(VIC.rasterline != RASTER_OFFSET + 12 + 5 * 8);
+    sprite_coll1 = VIC.spr_coll;
+    game_set_enemy_sprites_4_7();
+    while(VIC.rasterline != RASTER_OFFSET + 12 + 5 * 8 + 16);
+    game_move_enemies_4_7();
+    game_change_enemy_states_4_7();
+    game_add_enemy_points_4_7();
+    while(VIC.rasterline != RASTER_OFFSET + 12 + 5 * 8 + 16 + 5 * 8);
+    sprite_coll2 = VIC.spr_coll;
+    game_set_enemy_sprites_8_11();
+    while(VIC.rasterline != RASTER_OFFSET + 12 + 5 * 8 + 16 + 5 * 8 + 16);
+    game_move_enemies_8_11();
+    game_change_enemy_states_8_11();
+    game_add_enemy_points_8_11();
+    while(VIC.rasterline != RASTER_OFFSET + 12 + 5 * 8 + 16 + 5 * 8 + 16 + 5 * 8);
+    sprite_coll3 = VIC.spr_coll;
     while(VIC.rasterline != RASTER_OFFSET + 23 * 8 - 4);
     VIC.ctrl2 = 0xd8;
     sprite_bg_coll = VIC.spr_bg_coll;
+    game_display_score();
+    if(block_pos == 0 && scroll_pos == 0 && is_scroll) {
+      game_alloc_enemy1();
+      game_alloc_enemy2();
+      game_alloc_enemy3();
+    }
     if(!game_change_player_state()) {
       is_passed = 0;
       break;

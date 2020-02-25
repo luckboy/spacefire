@@ -16,45 +16,10 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;
 
-GAME_STATE_DISABLED     = 0
-GAME_STATE_LIVE         = 1
-GAME_STATE_DESTROYING   = 2
-
-GAME_SHOT_COUNT_MAX     = 3
-
-.struct player
-    state   .byte
-    x_coord .word
-    y_coord .byte
-    x_steps .byte 2
-    sprite  .byte
-    lives   .byte
-    score   .dword
-    start_explosion_sprite .byte
-    end_explosion_sprite .byte
-.endstruct
-
-.struct shot
-    is_enabled .byte
-    x_coord .word
-    y_coord .byte
-    x_steps .byte 2
-    sprite  .byte
-.endstruct
-
-.struct enemy
-    state   .byte
-    x_coord .word
-    y_coord .byte
-    x_steps .byte 2
+.struct enemy_desc
+    x_step  .byte
     y_steps .word
     y_step_count .byte
-    y_step_index .byte
     sprite  .byte
     points  .byte
-.endstruct
-
-.struct enemy_explosion
-    start_explosion_sprite .byte
-    end_explosion_sprite .byte
 .endstruct
