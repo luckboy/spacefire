@@ -17,7 +17,7 @@
  */
 #include "levels.h"
 
-struct level levels[LEVEL_COUNT] = {
+const struct level levels[LEVEL_COUNT] = {
   {
     {
       "                                        ",

@@ -26,6 +26,6 @@ struct level
   const char *enemies[3];
 };
 
-extern struct level levels[LEVEL_COUNT];
+extern const struct level levels[LEVEL_COUNT];
 
 #endif

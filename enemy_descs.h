@@ -23,12 +23,12 @@
 struct enemy_desc
 {
   unsigned char x_step;
-  signed char *y_steps;
+  const signed char *y_steps;
   unsigned char y_step_count;
   unsigned char sprite;
   unsigned char points;
 };
 
-extern struct enemy_desc enemy_descs[ENEMY_DESC_COUNT];
+extern const struct enemy_desc enemy_descs[ENEMY_DESC_COUNT];
 
 #endif

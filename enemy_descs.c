@@ -18,16 +18,16 @@
 #include "enemy_descs.h"
 #include "graphics.h"
 
-static signed char no_steps[1] = { 0 };
+static const signed char no_steps[1] = { 0 };
 
-static signed char steps[24] = {
+static const signed char steps[24] = {
   2, 2, 2, 1, 1, 1,
   -1, -1, -1, -2, -2, -2,
   -2, -2, -2, -1, -1, -1,
   1, 1, 1, 2, 2, 2
 };
 
-struct enemy_desc enemy_descs[ENEMY_DESC_COUNT] = {
+const struct enemy_desc enemy_descs[ENEMY_DESC_COUNT] = {
   {
     0,
     no_steps,

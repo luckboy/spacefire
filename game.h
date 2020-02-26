@@ -55,7 +55,7 @@ struct enemy
   unsigned x;
   unsigned char y;
   unsigned char x_steps[2];
-  signed char *y_steps;
+  const signed char *y_steps;
   unsigned char y_step_count;
   unsigned char y_step_index;
   unsigned char sprite;
