@@ -68,17 +68,17 @@
         .include "graphics.inc"
         .include "levels.inc"
 
-PLAYER_X_MIN = SPRITE_X_OFFSET + 8
-PLAYER_X_MAX = SPRITE_X_OFFSET + 40 * 8 - 8 - 24
-PLAYER_Y_MIN = SPRITE_Y_OFFSET
-PLAYER_Y_MAX = SPRITE_Y_OFFSET + 22 * 8 - 22
-PASSING_PLAYER_X_MAX = SPRITE_X_OFFSET + 40 * 8 - 8
-SHOT_X_MAX = SPRITE_X_OFFSET + 40 * 8 - 8
-ENEMY_X_MIN = SPRITE_X_OFFSET - 24 + 8
-ENEMY_X_MAX = SPRITE_X_OFFSET + 40 * 8
-ENEMY_Y1 = SPRITE_Y_OFFSET + 12 + ((5 * 8) >> 1) - (22 >> 1)
-ENEMY_Y2 = SPRITE_Y_OFFSET + 12 + 5 * 8 + 16 + ((5 * 8) >> 1) - (22 >> 1)
-ENEMY_Y3 = SPRITE_Y_OFFSET + 12 + 5 * 8 + 16 + 5 * 8 + 16 + ((5 * 8) >> 1) - (22 >> 1)
+PLAYER_X_MIN            = SPRITE_X_OFFSET + 8
+PLAYER_X_MAX            = SPRITE_X_OFFSET + 40 * 8 - 8 - 24
+PLAYER_Y_MIN            = SPRITE_Y_OFFSET
+PLAYER_Y_MAX            = SPRITE_Y_OFFSET + 22 * 8 - 22
+PASSING_PLAYER_X_MAX    = SPRITE_X_OFFSET + 40 * 8 - 8
+SHOT_X_MAX              = SPRITE_X_OFFSET + 40 * 8 - 8
+ENEMY_X_MIN             = SPRITE_X_OFFSET - 24 + 8
+ENEMY_X_MAX             = SPRITE_X_OFFSET + 40 * 8
+ENEMY_Y1                = SPRITE_Y_OFFSET + 12 + ((5 * 8) >> 1) - (22 >> 1)
+ENEMY_Y2                = SPRITE_Y_OFFSET + 12 + 5 * 8 + 16 + ((5 * 8) >> 1) - (22 >> 1)
+ENEMY_Y3                = SPRITE_Y_OFFSET + 12 + 5 * 8 + 16 + 5 * 8 + 16 + ((5 * 8) >> 1) - (22 >> 1)
 
         .rodata
         
