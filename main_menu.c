@@ -23,6 +23,8 @@
 #include "main_menu.h"
 #include "util.h"
 
+#define UP_DOWN_INTERVAL        8
+
 static unsigned char cursor;
 
 void initialize_main_menu(void) { cursor = 0; }
@@ -124,7 +126,7 @@ void main_menu_loop(void)
         }
       }
       up_count++;
-      if(up_count >= 8) up_count = 0;
+      if(up_count >= UP_DOWN_INTERVAL) up_count = 0;
     } else
       up_count = 0;
     if((port_a & 0x02) == 0) {
@@ -137,7 +139,7 @@ void main_menu_loop(void)
         }
       }
       down_count++;
-      if(down_count >= 8) down_count = 0;
+      if(down_count >= UP_DOWN_INTERVAL) down_count = 0;
     } else
       down_count = 0;
     if((port_a & 0x10) == 0) {
