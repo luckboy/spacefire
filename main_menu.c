@@ -105,11 +105,13 @@ void main_menu_draw(void)
 void main_menu_loop(void)
 {
   char is_exit = 0;
+  char is_fire = 0;
   unsigned char up_count = 0;
   unsigned char down_count = 0;
   SEI();
   while(!is_exit) {
     unsigned char port_a;
+    char is_pressed = 0;
     while(VIC.rasterline != RASTER_OFFSET - 8 || (VIC.ctrl1 & 0x80) != 0);
     port_a = CIA1.pra;
     if((port_a & 0x01) == 0) {
@@ -139,6 +141,12 @@ void main_menu_loop(void)
     } else
       down_count = 0;
     if((port_a & 0x10) == 0) {
+      is_fire = 1;
+    } else {
+      is_pressed = is_fire;
+      is_fire = 0;
+    }
+    if(is_pressed) {
       switch(cursor) {
       case 0:
         CLI();
