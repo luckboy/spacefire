@@ -25,15 +25,15 @@
 
 #define RASTER_OFFSET   51
 
-#define VIC_BANK        1
-#define SCREEN1         ((unsigned char *) 0x6000)
-#define SCREEN2         ((unsigned char *) 0x6400)
+#define VIC_BANK        2
+#define SCREEN1         ((unsigned char *) 0xa000)
+#define SCREEN2         ((unsigned char *) 0xa400)
 #define SPRITE_PTRS1    (SCREEN1 + 0x3f8)
 #define SPRITE_PTRS2    (SCREEN2 + 0x3f8)
 #define SCREEN          SCREEN1
 #define SPRITE_PTRS     SPRITE_PTRS1
-#define CHARS           ((unsigned char *) 0x6800)
-#define SPRITES         ((unsigned char *) 0x7000)
+#define CHARS           ((unsigned char *) 0xa800)
+#define SPRITES         ((unsigned char *) 0xb000)
 #define SPRITE_COUNT    26
 
 extern const char petscii_chars[8 * 64];

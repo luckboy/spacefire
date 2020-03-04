@@ -21,10 +21,10 @@ SPRITE_Y_OFFSET = 50
 
 RASTER_OFFSET   = 51
 
-VIC_BANK        = 1
-SCREEN1         := $6000
-SCREEN2         := $6400
+VIC_BANK        = 2
+SCREEN1         := $a000
+SCREEN2         := $a400
 SPRITE_PTRS1    := SCREEN1 + $3f8
 SPRITE_PTRS2    := SCREEN2 + $3f8
-CHARS           := $6800
-SPRITES         := $7000
+CHARS           := $a800
+SPRITES         := $b000
