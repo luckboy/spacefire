@@ -21,7 +21,7 @@ GAME_STATE_LIVE         = 1
 GAME_STATE_DESTROYING   = 2
 
 GAME_SHOT_COUNT_MAX     = 3
-GAME_ENEMY_COUNT_MAX    = 12   
+GAME_ENEMY_COUNT_MAX    = 12
 
 .struct player
     state   .byte
