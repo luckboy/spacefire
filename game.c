@@ -380,7 +380,7 @@ void draw_name(void)
     j++;
   }
   SCREEN[40 * 12 + x + j] = '<';
-  for(j++; j < 8; j++) {
+  for(j++; j < 9; j++) {
     SCREEN[40 * 12 + x + j] = ' ';
   }
 }
