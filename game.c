@@ -340,7 +340,6 @@ static void draw_game_over(void)
 {
   char *s;
   unsigned i;
-  unsigned char j;
   unsigned char x;
   VIC.ctrl1 &= 0xef;
   for(i = 0; i < 40 * 25; i++) {
@@ -349,11 +348,11 @@ static void draw_game_over(void)
   }
   s = "game over";
   x = 20 - ((strlen(s) + 1) >> 1);
-  j = 0;
+  i = 0;
   while(*s != 0) {
-    SCREEN[40 * 12 + x + j] = petscii_to_char(*s);
+    SCREEN[40 * 12 + x + i] = petscii_to_char(*s);
     s++;
-    j++;
+    i++;
   }
   VIC.ctrl1 |= 0x10;
 }
@@ -371,17 +370,17 @@ static void loop_game_over(void)
 void draw_name(void)
 {
   char *s = high_score.name;
-  unsigned char x, j;
+  unsigned char i, x;
   x = 20 - ((6 + 9 + 1) >> 1) + 6;
-  j = 0;
+  i = 0;
   while(*s != 0) {
-    SCREEN[40 * 12 + x + j] = petscii_to_char(*s);
+    SCREEN[40 * 12 + x + i] = petscii_to_char(*s);
     s++;
-    j++;
+    i++;
   }
-  SCREEN[40 * 12 + x + j] = '<';
-  for(j++; j < 9; j++) {
-    SCREEN[40 * 12 + x + j] = ' ';
+  SCREEN[40 * 12 + x + i] = '<';
+  for(i++; i < 9; i++) {
+    SCREEN[40 * 12 + x + i] = ' ';
   }
 }
 
@@ -389,7 +388,6 @@ static void draw_name_input(void)
 {
   char *s;
   unsigned i;
-  unsigned char j;
   unsigned char x;
   VIC.ctrl1 &= 0xef;
   for(i = 0; i < 40 * 25; i++) {
@@ -398,11 +396,11 @@ static void draw_name_input(void)
   }
   s = "name: ";
   x = 20 - ((6 + 9 + 1) >> 1);
-  j = 0;
+  i = 0;
   while(*s != 0) {
-    SCREEN[40 * 12 + x + j] = petscii_to_char(*s);
+    SCREEN[40 * 12 + x + i] = petscii_to_char(*s);
     s++;
-    j++;
+    i++;
   }
   draw_name();
   VIC.ctrl1 |= 0x10;
