@@ -15,12 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _UTIL_H
-#define _UTIL_H
+#ifndef _HIGH_SCORES_H
+#define _HIGH_SCORES_H
 
-unsigned char petscii_to_char(char c);
-void x8_to_dec_digits(unsigned char x, char *buf, unsigned char count);
-void x8_to_dec_digits_with_speces(unsigned char x, char *buf, unsigned char count);
-void x32_to_dec_digits_for_dec_mode(unsigned long x, char *buf, unsigned char count);
+struct high_score
+{
+  char is_selected;
+  char name[9];
+  unsigned long score;
+};
+
+extern struct high_score high_scores[10];
+
+void initialize_high_scores(void);
+void finalize_high_scores(void);
+
+void high_scores_draw(void);
+void high_scores_loop(void);
+char high_scores_can_add_high_score(unsigned long score);
+char high_scores_add_high_score(struct high_score *high_score);
+void high_scores_unselect(void);
 
 #endif

@@ -17,15 +17,19 @@
  */
 #include <6502.h>
 #include <c64.h>
+#include <conio.h>
 #include <stddef.h>
 #include <string.h>
 #include "enemy_descs.h"
 #include "game.h"
 #include "graphics.h"
+#include "high_scores.h"
 #include "levels.h"
 #include "util.h"
 
 #define SHOOTING_INTERVAL       ((40 * 8 - 2 * 8 - 24 + 23) / 24 + 2) / 3
+
+#define GAME_OVER_DELAY         (50 * 3)
 
 unsigned char level_pos;
 unsigned char block_pos;
@@ -47,6 +51,8 @@ unsigned char shot_alloc_index;
 struct enemy enemies[GAME_ENEMY_COUNT_MAX];
 unsigned char enemy_alloc_indices[3];
 struct enemy_explosion enemy_explosion;
+
+static struct high_score high_score;
 
 void initialize_game(void)
 { start_level_index = 0; }
@@ -326,7 +332,110 @@ static void draw_blank_screen(void)
     SCREEN[i] = ' ';
     COLOR_RAM[i] = COLOR_WHITE;
   }
+  VIC.ctrl1 |= 0x10;
+}
+
+static void draw_game_over(void)
+{
+  char *s;
+  unsigned i;
+  unsigned char j;
+  unsigned char x;
   VIC.ctrl1 &= 0xef;
+  for(i = 0; i < 40 * 25; i++) {
+    SCREEN[i] = ' ';
+    COLOR_RAM[i] = COLOR_WHITE;
+  }
+  s = "game over";
+  x = 20 - ((strlen(s) + 1) >> 1);
+  j = 0;
+  while(*s != 0) {
+    SCREEN[40 * 12 + x + j] = petscii_to_char(*s);
+    s++;
+    j++;
+  }
+  VIC.ctrl1 |= 0x10;
+}
+
+static void loop_game_over(void)
+{
+  unsigned char i;
+  SEI();
+  for(i = 0; i < GAME_OVER_DELAY; i++) {
+    while(VIC.rasterline != RASTER_OFFSET - 8 || (VIC.ctrl1 & 0x80) != 0);   
+  }
+  CLI();
+}
+
+void draw_name(void)
+{
+  char *s = high_score.name;
+  unsigned char x, j;
+  x = 20 - ((6 + 9 + 1) >> 1) + 6;
+  j = 0;
+  while(*s != 0) {
+    SCREEN[40 * 12 + x + j] = petscii_to_char(*s);
+    s++;
+    j++;
+  }
+  SCREEN[40 * 12 + x + j] = '<';
+  for(j++; j < 8; j++) {
+    SCREEN[40 * 12 + x + j] = ' ';
+  }
+}
+
+static void draw_name_input(void)
+{
+  char *s;
+  unsigned i;
+  unsigned char j;
+  unsigned char x;
+  VIC.ctrl1 &= 0xef;
+  for(i = 0; i < 40 * 25; i++) {
+    SCREEN[i] = ' ';
+    COLOR_RAM[i] = COLOR_WHITE;
+  }
+  s = "name: ";
+  x = 20 - ((6 + 9 + 1) >> 1);
+  j = 0;
+  while(*s != 0) {
+    SCREEN[40 * 12 + x + j] = petscii_to_char(*s);
+    s++;
+    j++;
+  }
+  draw_name();
+  VIC.ctrl1 |= 0x10;
+}
+
+void loop_name_input(void)
+{
+  char is_exit = 0;
+  unsigned char len;
+  while(!is_exit) {
+    char c = cgetc();
+    switch(c) {
+    case '\n':
+      is_exit = 1;
+      break;
+    case CH_DEL:
+      len = strlen(high_score.name);
+      if(len > 0) {
+        high_score.name[len - 1] = 0;
+        draw_name();
+      }
+      break;
+    default:
+      if(c >= 0x20 && c <= 0x5f) {
+        len = strlen(high_score.name);
+        if(len < 8) {
+          high_score.name[len] = c;
+          high_score.name[len + 1] = 0;
+          draw_name();
+        }
+      }
+      break;
+    }
+  }
 }
 
 void game_loop(void)
@@ -354,5 +463,18 @@ void game_loop(void)
       }
     }
     if(is_game_over) break;
+  }
+  draw_game_over();
+  loop_game_over();
+  if(high_scores_can_add_high_score(player.score)) {
+    high_score.is_selected = 1;
+    high_score.name[0] = 0;
+    high_score.score = player.score;
+    draw_name_input();
+    loop_name_input();
+    high_scores_add_high_score(&high_score);
+    high_scores_draw();
+    high_scores_loop();
+    high_scores_unselect();
   }
 }

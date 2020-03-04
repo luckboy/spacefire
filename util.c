@@ -38,6 +38,22 @@ void x8_to_dec_digits(unsigned char x, char *buf, unsigned char count)
   }
 }
 
+void x8_to_dec_digits_with_speces(unsigned char x, char *buf, unsigned char count)
+{
+  unsigned char i;
+  char *s = buf + count;
+  *s = 0;
+  s--;
+  for(i = count; i > 0; i--) {
+    if(x != 0 || i == count)
+      *s = (x % 10) + '0';
+    else
+      *s = ' ';
+    x /= 10;
+    s--;
+  }
+}
+
 void x32_to_dec_digits_for_dec_mode(unsigned long x, char *buf, unsigned char count)
 {
   unsigned char i;

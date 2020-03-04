@@ -17,16 +17,19 @@
  */
 #include "game.h"
 #include "graphics.h"
+#include "high_scores.h"
 #include "main_menu.h"
 
 int main(void)
 {
   initialize_game();
   initialize_graphics();
+  initialize_high_scores();
   initialize_main_menu();
   main_menu_draw();
   main_menu_loop();
   finalize_main_menu();
+  finalize_high_scores();
   finalize_graphics();
   finalize_game();
   return 0;

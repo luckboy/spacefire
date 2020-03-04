@@ -20,6 +20,7 @@
 #include <string.h>
 #include "game.h"
 #include "graphics.h"
+#include "high_scores.h"
 #include "main_menu.h"
 #include "util.h"
 
@@ -157,6 +158,11 @@ void main_menu_loop(void)
         main_menu_draw();
         break;
       case 1:
+        CLI();
+        high_scores_draw();
+        high_scores_loop();
+        SEI();
+        main_menu_draw();
         break;
       case 2:
         is_exit = 1;
