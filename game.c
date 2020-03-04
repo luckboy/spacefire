@@ -17,6 +17,7 @@
  */
 #include <6502.h>
 #include <c64.h>
+#include <cbm.h>
 #include <conio.h>
 #include <stddef.h>
 #include <string.h>
