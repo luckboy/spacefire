@@ -31,7 +31,7 @@
 
 #define SHOOTING_INTERVAL       ((40 * 8 - 2 * 8 - 24 + 23) / 24 + 2) / 3
 
-#define GAME_OVER_DELAY         (50 * 3)
+#define GAME_OVER_DELAY         (50 * 5)
 
 unsigned char level_pos;
 unsigned char block_pos;
