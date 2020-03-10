@@ -6,7 +6,7 @@ C1541 = c1541
 SYS = c64
 
 OBJS = chars.o enemy_descs.o game.o game_asm.o graphics.o high_scores.o levels.o main.o main_menu.o \
-	sprites.o util.o
+	sound.o sound_effects.o sound_effects_asm.o sprites.o tab_freqs.o util.o
 
 .c.o:
 	$(CC) -c -t $(SYS) $(CFLAGS) -o $@ $<
@@ -34,4 +34,7 @@ high_scores.o: high_scores.c high_scores.h graphics.h util.h
 levels.o: levels.c levels.h
 main.o: main.c game.h graphics.h high_scores.h main_menu.h
 main_menu.o: main_menu.c main_menu.h game.h graphics.h high_scores.h util.h
+sound.o: sound.c sound.h
+sound_effects.o: sound_effects.c sound_effects.h sound.h
+sound_effects_asm.o: sound_effects_asm.s sound_effects.inc
 util.o: util.c util.h

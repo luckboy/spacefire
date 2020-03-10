@@ -15,25 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "game.h"
-#include "graphics.h"
-#include "high_scores.h"
-#include "main_menu.h"
-#include "sound.h"
+#ifndef _SOUND_H
+#define _SOUND_H
 
-int main(void)
-{
-  initialize_game();
-  initialize_graphics();
-  initialize_high_scores();
-  initialize_main_menu();
-  initialize_sound();
-  main_menu_draw();
-  main_menu_loop();
-  finalize_sound();
-  finalize_main_menu();
-  finalize_high_scores();
-  finalize_graphics();
-  finalize_game();
-  return 0;
-}
+extern const unsigned tab_freqs[8 * 12];
+
+void initialize_sound(void);
+void finalize_sound(void);
+
+#endif

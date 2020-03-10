@@ -60,6 +60,7 @@
         .import _enemy_alloc_indices
         .import _enemy_explosion
         .import _enemy_descs
+        .import _sound_effect_flags
         .importzp tmp1, ptr1
         
         .include "c64.inc"
@@ -754,6 +755,8 @@ Ltab_shot_xs:
         bcc L0801
         lda #0
         sta _shot_alloc_index
+        lda #1
+        sta _sound_effect_flags + 0
 L0801:  rts
 .endproc
 
@@ -911,6 +914,8 @@ L1006:  rts
         sta _player + player::state
         lda _player + player::start_explosion_sprite
         sta _player + player::sprite
+        lda #1
+        sta _sound_effect_flags + 2
 L1102:  lda #1
         rts
 L1101:  lda _player + player::state
@@ -1412,6 +1417,8 @@ L1510:  rts
         sta _enemies + enemy::state + .sizeof(enemy) * 0
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 0
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1602
 L1601:  lda _enemies + enemy::state + .sizeof(enemy) * 0
         cmp #GAME_STATE_DESTROYING
@@ -1433,6 +1440,8 @@ L1602:  lda _enemies + enemy::state + .sizeof(enemy) * 1
         sta _enemies + enemy::state + .sizeof(enemy) * 1
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 1
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1604
 L1603:  lda _enemies + enemy::state + .sizeof(enemy) * 1
         cmp #GAME_STATE_DESTROYING
@@ -1454,6 +1463,8 @@ L1604:  lda _enemies + enemy::state + .sizeof(enemy) * 2
         sta _enemies + enemy::state + .sizeof(enemy) * 2
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 2
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1606
 L1605:  lda _enemies + enemy::state + .sizeof(enemy) * 2
         cmp #GAME_STATE_DESTROYING
@@ -1475,6 +1486,8 @@ L1606:  lda _enemies + enemy::state + .sizeof(enemy) * 3
         sta _enemies + enemy::state + .sizeof(enemy) * 3
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 3
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1608
 L1607:  lda _enemies + enemy::state + .sizeof(enemy) * 3
         cmp #GAME_STATE_DESTROYING
@@ -1500,6 +1513,8 @@ L1608:  rts
         sta _enemies + enemy::state + .sizeof(enemy) * 4
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 4
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1702
 L1701:  lda _enemies + enemy::state + .sizeof(enemy) * 4
         cmp #GAME_STATE_DESTROYING
@@ -1521,6 +1536,8 @@ L1702:  lda _enemies + enemy::state + .sizeof(enemy) * 5
         sta _enemies + enemy::state + .sizeof(enemy) * 5
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 5
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1704
 L1703:  lda _enemies + enemy::state + .sizeof(enemy) * 5
         cmp #GAME_STATE_DESTROYING
@@ -1542,6 +1559,8 @@ L1704:  lda _enemies + enemy::state + .sizeof(enemy) * 6
         sta _enemies + enemy::state + .sizeof(enemy) * 6
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 6
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1706
 L1705:  lda _enemies + enemy::state + .sizeof(enemy) * 6
         cmp #GAME_STATE_DESTROYING
@@ -1563,6 +1582,8 @@ L1706:  lda _enemies + enemy::state + .sizeof(enemy) * 7
         sta _enemies + enemy::state + .sizeof(enemy) * 7
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 7
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1708
 L1707:  lda _enemies + enemy::state + .sizeof(enemy) * 7
         cmp #GAME_STATE_DESTROYING
@@ -1588,6 +1609,8 @@ L1708:  rts
         sta _enemies + enemy::state + .sizeof(enemy) * 8
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 8
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1802
 L1801:  lda _enemies + enemy::state + .sizeof(enemy) * 8
         cmp #GAME_STATE_DESTROYING
@@ -1609,6 +1632,8 @@ L1802:  lda _enemies + enemy::state + .sizeof(enemy) * 9
         sta _enemies + enemy::state + .sizeof(enemy) * 9
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 9
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1804
 L1803:  lda _enemies + enemy::state + .sizeof(enemy) * 9
         cmp #GAME_STATE_DESTROYING
@@ -1630,6 +1655,8 @@ L1804:  lda _enemies + enemy::state + .sizeof(enemy) * 10
         sta _enemies + enemy::state + .sizeof(enemy) * 10
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 10
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1806
 L1805:  lda _enemies + enemy::state + .sizeof(enemy) * 10
         cmp #GAME_STATE_DESTROYING
@@ -1651,6 +1678,8 @@ L1806:  lda _enemies + enemy::state + .sizeof(enemy) * 11
         sta _enemies + enemy::state + .sizeof(enemy) * 11
         lda _enemy_explosion + enemy_explosion::start_explosion_sprite
         sta _enemies + enemy::sprite + .sizeof(enemy) * 11
+        lda #1
+        sta _sound_effect_flags + 1
         jmp L1808
 L1807:  lda _enemies + enemy::state + .sizeof(enemy) * 11
         cmp #GAME_STATE_DESTROYING

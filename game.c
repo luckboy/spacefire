@@ -26,6 +26,7 @@
 #include "graphics.h"
 #include "high_scores.h"
 #include "levels.h"
+#include "sound_effects.h"
 #include "util.h"
 
 #define SHOOTING_INTERVAL       ((40 * 8 - 2 * 8 - 24 + 23) / 24 + 2) / 3
@@ -249,6 +250,7 @@ static char play_level(void)
   is_passed = 1;
   shooting_count = 0;
   is_shot = 0;
+  sound_effect_start();
   SEI();
   while(1) {
     static unsigned char port_a;
@@ -318,8 +320,11 @@ static char play_level(void)
       break;
     }
     game_change_shot_states();
+    while(VIC.rasterline != RASTER_OFFSET + 25 * 8);
+    sound_effect_play();
   }
   CLI();
+  sound_effect_stop();
   return is_passed;
 }
 
