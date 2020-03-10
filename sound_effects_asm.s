@@ -83,7 +83,7 @@ L01start:
         tax
         lda _tab_freqs, x
         sta SID_S3Lo
-        lda _tab_freqs, x
+        lda _tab_freqs + 1, x
         sta SID_S3Hi
         lda _current_sound_effect + sound_effect::ctrl
         sta SID_Ctl3
@@ -104,7 +104,7 @@ L01play:lda _sound_effect_num
         tax
         lda _tab_freqs, x
         sta SID_S3Lo
-        lda _tab_freqs, x
+        lda _tab_freqs + 1, x
         sta SID_S3Hi
         jmp L01ret
 L01stop:lda #0
