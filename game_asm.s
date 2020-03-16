@@ -2261,6 +2261,8 @@ Ltab_enemy_desc_xs:
         .byte .sizeof(enemy_desc) * 1
         .byte .sizeof(enemy_desc) * 2
         .byte .sizeof(enemy_desc) * 3
+        .byte .sizeof(enemy_desc) * 4
+        .byte .sizeof(enemy_desc) * 5
 
 Ltab_enemy_xs:
         .byte .sizeof(enemy) * 0

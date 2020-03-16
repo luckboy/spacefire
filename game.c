@@ -119,8 +119,8 @@ static void set_level(void)
     enemies[i].sprite = (((unsigned) (SPRITES + 64 * 18)) - (VIC_BANK << 14)) >> 6;
     enemies[i].points = 0x10;
   }
-  enemy_explosion.start_explosion_sprite = (((unsigned) (SPRITES + 64 * 22)) - (VIC_BANK << 14)) >> 6;
-  enemy_explosion.end_explosion_sprite = (((unsigned) (SPRITES + 64 * 26)) - (VIC_BANK << 14)) >> 6;
+  enemy_explosion.start_explosion_sprite = (((unsigned) (SPRITES + 64 * 24)) - (VIC_BANK << 14)) >> 6;
+  enemy_explosion.end_explosion_sprite = (((unsigned) (SPRITES + 64 * 28)) - (VIC_BANK << 14)) >> 6;
   for(i = 0; i < 3; i++) {
     enemy_alloc_indices[i] = 0;
   }

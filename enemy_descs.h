@@ -18,7 +18,7 @@
 #ifndef _ENEMY_DESCS_H
 #define _ENEMY_DESCS_H
 
-#define ENEMY_DESC_COUNT        4
+#define ENEMY_DESC_COUNT        6
 
 struct enemy_desc
 {

@@ -55,5 +55,19 @@ const struct enemy_desc enemy_descs[ENEMY_DESC_COUNT] = {
     24,
     (((unsigned) (SPRITES + 64 * 21)) - (VIC_BANK << 14)) >> 6,
     0x40
+  },
+  {
+    4,
+    no_steps,
+    1,
+    (((unsigned) (SPRITES + 64 * 22)) - (VIC_BANK << 14)) >> 6,
+    0x50
+  },
+  {
+    4,
+    steps,
+    24,
+    (((unsigned) (SPRITES + 64 * 23)) - (VIC_BANK << 14)) >> 6,
+    0x60
   }
 };

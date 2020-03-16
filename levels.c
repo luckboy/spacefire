@@ -59,9 +59,9 @@ const struct level levels[LEVEL_COUNT] = {
       "            JGGGGGGGGGGGK               "
     },
     {
+      "                        5                ",
       "                                         ",
-      "                                         ",
-      "                                         "
+      "                        6                "
     }
   }
 };
