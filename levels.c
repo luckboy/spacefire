@@ -17,6 +17,12 @@
  */
 #include "levels.h"
 
+/*
+ * A  B  C  D  E  F  G  H  I  J  K  L  M
+ * -- || /- -\ |\ /| ..  / \  \. ./ ## ..
+ * -- || |/ \| \- -/ .. /. .\  \ /  ## ..
+ */
+
 const struct level levels[LEVEL_COUNT] = {
   {
     {
@@ -36,6 +42,26 @@ const struct level levels[LEVEL_COUNT] = {
       "              1 1 1 1                    ",
       "              2 2 2 2                2   ",
       "              3 3 3 3                3 4 "
+    }
+  },
+  {
+    {
+      "            HGGGGGGGGGGGI               ",
+      "           HGGGGGGGGGGGGGI              ",
+      "          HGGGGLLLLLLLGGGGI             ",
+      "         HGGGGGLLLLLLLMGGGGI            ",
+      "         GGGGGGLLLLLLLMGGGGG            ",
+      "         GGGGGGLLLLLLLMGGGGG            ",
+      "         GGGGGGLLLLLLLMGGGGG            ",
+      "         JGGGGGLLLLLLLMGGGGK            ",
+      "          JGGGGLLLLLLLMGGGK             ",
+      "           JGGGGMMMMMMMGGK              ",
+      "            JGGGGGGGGGGGK               "
+    },
+    {
+      "                                         ",
+      "                                         ",
+      "                                         "
     }
   }
 };

@@ -18,7 +18,7 @@
 #ifndef _LEVELS_H
 #define _LEVELS_H
 
-#define LEVEL_COUNT             1
+#define LEVEL_COUNT             2
 
 struct level
 {
