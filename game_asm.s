@@ -337,7 +337,7 @@ L0606:  lda _current_level + level::chars + 3 * 2
         sta ptr1 + 1
         lda (ptr1),y
         cmp #$20 ; space
-        bne L0603
+        bne L0607
         sta SCREEN2 + 40 * (3 * 2 + 0) + 39
         sta SCREEN2 + 40 * (3 * 2 + 1) + 39
         jmp L0608
