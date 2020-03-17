@@ -183,12 +183,12 @@ static void draw_level(void)
     i++;
   }
   strcpy(buf, "level: ");
-  x8_to_dec_digits((current_level_index + 1), buf + strlen(buf), 2);
+  x8_to_dec_digits((current_level_index + 1), buf + strlen(buf), 1);
   s = buf;
   i = 0;
   while(*s != 0) {
-    SCREEN1[40 * 23 + 20 - 5 + i] = petscii_to_char(*s);
-    SCREEN2[40 * 23 + 20 - 5 + i] = petscii_to_char(*s);
+    SCREEN1[40 * 23 + 20 - 4 + i] = petscii_to_char(*s);
+    SCREEN2[40 * 23 + 20 - 4 + i] = petscii_to_char(*s);
     s++;
     i++;
   }
