@@ -1602,7 +1602,7 @@ L1708:  rts
         lda _enemies + enemy::state + .sizeof(enemy) * 8
         cmp #GAME_STATE_LIVE
         bne L1801
-        lda _sprite_coll1
+        lda _sprite_coll3
         and #$10
         beq L1802
         lda #GAME_STATE_DESTROYING
@@ -1625,7 +1625,7 @@ L1801:  lda _enemies + enemy::state + .sizeof(enemy) * 8
 L1802:  lda _enemies + enemy::state + .sizeof(enemy) * 9
         cmp #GAME_STATE_LIVE
         bne L1803
-        lda _sprite_coll1
+        lda _sprite_coll3
         and #$20
         beq L1804
         lda #GAME_STATE_DESTROYING
@@ -1648,7 +1648,7 @@ L1803:  lda _enemies + enemy::state + .sizeof(enemy) * 9
 L1804:  lda _enemies + enemy::state + .sizeof(enemy) * 10
         cmp #GAME_STATE_LIVE
         bne L1805
-        lda _sprite_coll1
+        lda _sprite_coll3
         and #$40
         beq L1806
         lda #GAME_STATE_DESTROYING
@@ -1671,7 +1671,7 @@ L1805:  lda _enemies + enemy::state + .sizeof(enemy) * 10
 L1806:  lda _enemies + enemy::state + .sizeof(enemy) * 11
         cmp #GAME_STATE_LIVE
         bne L1807
-        lda _sprite_coll1
+        lda _sprite_coll3
         and #$80
         beq L1808
         lda #GAME_STATE_DESTROYING
