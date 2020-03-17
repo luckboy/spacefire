@@ -128,7 +128,7 @@ const struct level levels[LEVEL_COUNT] = {
     {
       "                    2    2    1    1    1    1    1                                                  ",
       "                                                                                2    2    2          ",
-      "                                                       1    1    1    1                              "
+      "                                                            1    1    1                              "
     }
   },
   /* 4 */
@@ -210,9 +210,9 @@ const struct level levels[LEVEL_COUNT] = {
       "                   JGGGGGGGGGGGGGGGGGGLLLLLLLLLLMGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
     },
     {
-      "                    5    5    5                        1              5         5  5  5  5           ",
+      "                    5    5    5    5                   1              5         5  5  5  5           ",
       "                    5                   2    2    2                             5  5  5  5           ",
-      "                    5    5    5                        1              5         5  5  5  5           "
+      "                    5    5    5    5                   1              5         5  5  5  5           "
     }
   },
   /* 8 */
