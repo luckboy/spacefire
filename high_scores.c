@@ -57,9 +57,10 @@ void high_scores_draw(void)
   }
   for(i = 0; i < 10; i++) {
     static char buf[32];
+    struct high_score *high_score = &high_scores[i];
     x = 20 - ((2 + 1 + 8 + 1 + 6 + 2 + 2) >> 1);
     y = 12 - (12 >> 1) + 2 + i;
-    SCREEN[y * 40 + x] = (high_scores[i].is_selected ? '>' : ' ');
+    SCREEN[y * 40 + x] = (high_score->is_selected ? '>' : ' ');
     x += 2;
     x8_to_dec_digits_with_speces(i + 1, buf, 2);
     s = buf;
@@ -70,7 +71,7 @@ void high_scores_draw(void)
       j++;
     }
     x += 3;
-    s = high_scores[i].name;
+    s = high_score->name;
     j = 0;
     while(*s != 0) {
       SCREEN[y * 40 + x + j] = petscii_to_char(*s);
@@ -78,7 +79,7 @@ void high_scores_draw(void)
       j++;
     }
     x += 9;
-    x32_to_dec_digits_for_dec_mode(high_scores[i].score, buf, 6);
+    x32_to_dec_digits_for_dec_mode(high_score->score, buf, 6);
     s = buf;
     j = 0;
     while(*s != 0) {
@@ -87,7 +88,7 @@ void high_scores_draw(void)
       j++;
     }
     x += 7;
-    SCREEN[y * 40 + x] = (high_scores[i].is_selected ? '<' : ' ');
+    SCREEN[y * 40 + x] = (high_score->is_selected ? '<' : ' ');
   }
   VIC.ctrl1 |= 0x10;
 }

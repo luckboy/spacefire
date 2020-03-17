@@ -72,16 +72,18 @@ static void alloc_enemy(unsigned char i, unsigned char j)
   if(current_level.enemies[i][j] != ' ') {
     unsigned char k = current_level.enemies[i][j] - '1';
     unsigned char l = enemy_alloc_indices[i] + i * 4;
-    enemies[l].state = GAME_STATE_LIVE;
-    enemies[l].x = SPRITE_X_OFFSET + j * 16 + 6;
-    enemies[l].y = tab_enemy_xs[i];
-    enemies[l].x_steps[0] = enemy_descs[k].x_step;
-    enemies[l].x_steps[1] = enemy_descs[k].x_step + 2;
-    enemies[l].y_steps = enemy_descs[k].y_steps;
-    enemies[l].y_step_count = enemy_descs[k].y_step_count;
-    enemies[l].y_step_index = 0;
-    enemies[l].sprite = enemy_descs[k].sprite;
-    enemies[l].points = enemy_descs[k].points;
+    const struct enemy_desc *enemy_desc = &enemy_descs[k];
+    struct enemy *enemy = &enemies[l];
+    enemy->state = GAME_STATE_LIVE;
+    enemy->x = SPRITE_X_OFFSET + j * 16 + 6;
+    enemy->y = tab_enemy_xs[i];
+    enemy->x_steps[0] = enemy_desc->x_step;
+    enemy->x_steps[1] = enemy_desc->x_step + 2;
+    enemy->y_steps = enemy_desc->y_steps;
+    enemy->y_step_count = enemy_desc->y_step_count;
+    enemy->y_step_index = 0;
+    enemy->sprite = enemy_desc->sprite;
+    enemy->points = enemy_desc->points;
     enemy_alloc_indices[i]++;
     if(enemy_alloc_indices[i] >= 4) enemy_alloc_indices[i] = 0;
   }
@@ -99,25 +101,27 @@ static void set_level(void)
   player.start_explosion_sprite = (((unsigned) (SPRITES + 64 * 2)) - (VIC_BANK << 14)) >> 6;
   player.end_explosion_sprite = (((unsigned) (SPRITES + 64 * 18)) - (VIC_BANK << 14)) >> 6;
   for(i = 0; i < GAME_SHOT_COUNT_MAX; i++) {
-    shots[i].is_enabled = 0;
-    shots[i].x = 0;
-    shots[i].y = 0;
-    shots[i].x_steps[0] = 24 + 2;
-    shots[i].x_steps[1] = 24;
-    shots[i].sprite = (((unsigned) (SPRITES + 64 * 1)) - (VIC_BANK << 14)) >> 6;
+    struct shot *shot = &shots[i];
+    shot->is_enabled = 0;
+    shot->x = 0;
+    shot->y = 0;
+    shot->x_steps[0] = 24 + 2;
+    shot->x_steps[1] = 24;
+    shot->sprite = (((unsigned) (SPRITES + 64 * 1)) - (VIC_BANK << 14)) >> 6;
   }
   shot_alloc_index = 0;
   for(i = 0; i < GAME_ENEMY_COUNT_MAX; i++) {
-    enemies[i].state = GAME_STATE_DISABLED;
-    enemies[i].x = 0;
-    enemies[i].y = 0;
-    enemies[i].x_steps[0] = 0;
-    enemies[i].x_steps[1] = 2;
-    enemies[i].y_steps = NULL;
-    enemies[i].y_step_count = 0;
-    enemies[i].y_step_index = 0;
-    enemies[i].sprite = (((unsigned) (SPRITES + 64 * 18)) - (VIC_BANK << 14)) >> 6;
-    enemies[i].points = 0x10;
+    struct enemy *enemy = &enemies[i];
+    enemy->state = GAME_STATE_DISABLED;
+    enemy->x = 0;
+    enemy->y = 0;
+    enemy->x_steps[0] = 0;
+    enemy->x_steps[1] = 2;
+    enemy->y_steps = NULL;
+    enemy->y_step_count = 0;
+    enemy->y_step_index = 0;
+    enemy->sprite = (((unsigned) (SPRITES + 64 * 18)) - (VIC_BANK << 14)) >> 6;
+    enemy->points = 0x10;
   }
   enemy_explosion.start_explosion_sprite = (((unsigned) (SPRITES + 64 * 24)) - (VIC_BANK << 14)) >> 6;
   enemy_explosion.end_explosion_sprite = (((unsigned) (SPRITES + 64 * 28)) - (VIC_BANK << 14)) >> 6;
