@@ -45,6 +45,7 @@ unsigned char sprite_coll2;
 unsigned char sprite_coll3;
 
 unsigned char start_level_index;
+unsigned char end_level_index;
 unsigned char current_level_index;
 struct level current_level;
 struct player player;
@@ -57,7 +58,10 @@ struct enemy_explosion enemy_explosion;
 static struct high_score high_score;
 
 void initialize_game(void)
-{ start_level_index = 0; }
+{
+  start_level_index = 0;
+  end_level_index = LEVEL_COUNT;
+}
 
 void finalize_game(void) {}
 
@@ -451,7 +455,7 @@ void game_loop(void)
   unsigned char i;
   player.lives = 3;
   player.score = 0;
-  for(i = start_level_index; i < LEVEL_COUNT; i++) {
+  for(i = start_level_index; i < end_level_index; i++) {
     char is_game_over = 0;
     current_level_index = i;
     current_level = levels[i];

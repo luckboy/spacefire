@@ -18,7 +18,11 @@
 #ifndef _LEVELS_H
 #define _LEVELS_H
 
+#if 0
 #define LEVEL_COUNT             2
+#else
+#define LEVEL_COUNT             8
+#endif
 
 struct level
 {

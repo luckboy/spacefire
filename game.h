@@ -80,6 +80,7 @@ extern unsigned char sprite_coll2;
 extern unsigned char sprite_coll3;
 
 extern unsigned char start_level_index;
+extern unsigned char end_level_index;
 extern unsigned char current_level_index;
 extern struct level current_level;
 extern struct player player;
