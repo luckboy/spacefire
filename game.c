@@ -138,6 +138,10 @@ static void set_level(void)
   level_pos = 20;
   block_pos = 0;
   scroll_pos = 6;
+  sprite_bg_coll = 0;
+  sprite_coll1 = 0;
+  sprite_coll2 = 0;
+  sprite_coll3 = 0;
 }
 
 static void draw_level(void)
