@@ -84,7 +84,7 @@ L01start1:
         ldy _music_note_pos1
         lda (ptr1), y
         cmp #MUSIC_NONE
-        beq L01ret1
+        beq L01no_play1
         asl
         tax
         lda _tab_freqs, x
@@ -93,6 +93,7 @@ L01start1:
         sta SID_S1Hi
         lda _current_music + music::ctrl1
         sta SID_Ctl1
+L01no_play1:
         lda #1
         sta _is_music_gate1
         lda #0
@@ -150,7 +151,7 @@ L01start2:
         ldy _music_note_pos2
         lda (ptr1), y
         cmp #MUSIC_NONE
-        beq L01ret2
+        beq L01no_play2
         asl
         tax
         lda _tab_freqs, x
@@ -159,6 +160,7 @@ L01start2:
         sta SID_S2Hi
         lda _current_music + music::ctrl2
         sta SID_Ctl2
+L01no_play2:
         lda #1
         sta _is_music_gate2
         lda #0
