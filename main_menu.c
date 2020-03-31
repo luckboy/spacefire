@@ -22,6 +22,7 @@
 #include "graphics.h"
 #include "high_scores.h"
 #include "main_menu.h"
+#include "musics.h"
 #include "util.h"
 
 #define UP_DOWN_INTERVAL        8
@@ -111,6 +112,8 @@ void main_menu_loop(void)
   char is_fire = 0;
   unsigned char up_count = 0;
   unsigned char down_count = 0;
+  music_set(&intro_music);
+  music_start();
   SEI();
   while(!is_exit) {
     unsigned char port_a;
@@ -153,22 +156,31 @@ void main_menu_loop(void)
       switch(cursor) {
       case 0:
         CLI();
+        music_stop();
         game_loop();
-        SEI();
         main_menu_draw();
+        music_set(&intro_music);
+        music_start();
+        SEI();
         break;
       case 1:
         CLI();
+        music_stop();
         high_scores_draw();
         high_scores_loop();
-        SEI();
         main_menu_draw();
+        music_set(&intro_music);
+        music_start();
+        SEI();
         break;
       case 2:
         is_exit = 1;
         break;
       }
     }
+    while(VIC.rasterline != RASTER_OFFSET + 25 * 8);
+    music_play();
   }
   CLI();
+  music_stop();
 }
