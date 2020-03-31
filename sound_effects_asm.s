@@ -21,7 +21,7 @@
         .import _current_sound_effect
         .import _sound_effect_flags
         .import _sound_effect_num
-        .import _note_pos
+        .import _sound_effect_note_pos
         .importzp ptr1
 
         .include "c64.inc"
@@ -72,12 +72,12 @@ L01start:
         lda _sound_effects + sound_effect::note_count, x
         sta _current_sound_effect + sound_effect::note_count
         lda #0
-        sta _note_pos
+        sta _sound_effect_note_pos
         lda _current_sound_effect + sound_effect::notes
         sta ptr1
         lda _current_sound_effect + sound_effect::notes + 1
         sta ptr1 + 1
-        ldy _note_pos
+        ldy _sound_effect_note_pos
         lda (ptr1), y
         asl
         tax
@@ -90,15 +90,15 @@ L01start:
         jmp L01ret
 L01play:lda _sound_effect_num
         beq L01ret
-        inc _note_pos
-        lda _note_pos
+        inc _sound_effect_note_pos
+        lda _sound_effect_note_pos
         cmp _current_sound_effect + sound_effect::note_count
         bcs L01stop                     ; !(note_pos < current_sound_effect.note_count)
         lda _current_sound_effect + sound_effect::notes
         sta ptr1
         lda _current_sound_effect + sound_effect::notes + 1
         sta ptr1 + 1
-        ldy _note_pos
+        ldy _sound_effect_note_pos
         lda (ptr1), y
         asl
         tax

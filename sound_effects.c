@@ -77,7 +77,7 @@ const struct sound_effect sound_effects[SOUND_EFFECT_COUNT] = {
 struct sound_effect current_sound_effect;
 char sound_effect_flags[SOUND_EFFECT_COUNT];
 unsigned char sound_effect_num;
-unsigned char note_pos;
+unsigned char sound_effect_note_pos;
 
 
 void sound_effect_start(void)

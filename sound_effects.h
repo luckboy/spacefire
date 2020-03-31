@@ -32,7 +32,7 @@ extern const struct sound_effect sound_effects[SOUND_EFFECT_COUNT];
 extern struct sound_effect current_sound_effect;
 extern char sound_effect_flags[SOUND_EFFECT_COUNT];
 extern unsigned char sound_effect_num;
-extern unsigned char note_pos;
+extern unsigned char sound_effect_note_pos;
 
 void sound_effect_start(void);
 void sound_effect_stop(void);
