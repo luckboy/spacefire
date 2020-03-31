@@ -50,10 +50,11 @@ L01gate1:
         ldy _music_note_pos1
         lda (ptr1), y
         cmp #MUSIC_NONE
-        beq L01ret1
+        beq L01no_release1
         lda _current_music + music::ctrl1
         and #$fe
         sta SID_Ctl1
+L01no_release1:
         lda #0
         sta _is_music_gate1
         sta _music_gate_pos1
@@ -117,10 +118,11 @@ L01gate2:
         ldy _music_note_pos2
         lda (ptr1), y
         cmp #MUSIC_NONE
-        beq L01ret2
+        beq L01no_release2
         lda _current_music + music::ctrl2
         and #$fe
         sta SID_Ctl2
+L01no_release2:
         lda #0
         sta _is_music_gate2
         sta _music_gate_pos2
