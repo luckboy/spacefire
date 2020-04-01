@@ -36,7 +36,7 @@
         lda _is_music_start1
         bne L01start1
         lda _is_music_gate1
-        bne L01no_gate1
+        beq L01no_gate1
         inc _music_gate_pos1
         lda _music_gate_pos1
         cmp _current_music + music::gate_interval1
@@ -104,7 +104,7 @@ L01no_play1:
 L01ret1:lda _is_music_start2
         bne L01start2
         lda _is_music_gate2
-        bne L01no_gate2
+        beq L01no_gate2
         inc _music_gate_pos2
         lda _music_gate_pos2
         cmp _current_music + music::gate_interval2
