@@ -26,6 +26,7 @@
 #include "graphics.h"
 #include "high_scores.h"
 #include "levels.h"
+#include "musics.h"
 #include "sound_effects.h"
 #include "util.h"
 
@@ -142,6 +143,7 @@ static void set_level(void)
   sprite_coll1 = 0;
   sprite_coll2 = 0;
   sprite_coll3 = 0;
+  music_set(&game_music);
 }
 
 static void draw_level(void)
@@ -262,6 +264,7 @@ static char play_level(void)
   is_passed = 1;
   shooting_count = 0;
   is_shot = 0;
+  music_start();
   sound_effect_start();
   SEI();
   while(1) {
@@ -333,10 +336,12 @@ static char play_level(void)
     }
     game_change_shot_states();
     while(VIC.rasterline != RASTER_OFFSET + 25 * 8);
+    music_play();
     sound_effect_play();
   }
   CLI();
   sound_effect_stop();
+  music_stop();
   return is_passed;
 }
 
@@ -352,6 +357,9 @@ static void draw_blank_screen(void)
   }
   VIC.ctrl1 |= 0x10;
 }
+
+static void set_game_over()
+{ music_set(&game_over_music); }
 
 static void draw_game_over(void)
 {
@@ -377,11 +385,15 @@ static void draw_game_over(void)
 static void loop_game_over(void)
 {
   unsigned char i;
+  music_start();
   SEI();
   for(i = 0; i < GAME_OVER_DELAY; i++) {
-    while(VIC.rasterline != RASTER_OFFSET - 8 || (VIC.ctrl1 & 0x80) != 0);   
+    while(VIC.rasterline != RASTER_OFFSET - 8 || (VIC.ctrl1 & 0x80) != 0);
+    while(VIC.rasterline != RASTER_OFFSET + 25 * 8);
+    music_play();
   }
   CLI();
+  music_stop();
 }
 
 void draw_name(void)
@@ -480,6 +492,7 @@ void game_loop(void)
     }
     if(is_game_over) break;
   }
+  set_game_over();
   draw_game_over();
   loop_game_over();
   if(high_scores_can_add_high_score(player.score)) {

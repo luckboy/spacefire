@@ -19,39 +19,188 @@
 #include "sound.h"
 #include "musics.h"
 
-const unsigned char intro_music_notes1[6] = {
+const unsigned char intro_music_notes1[21] = {
   12 * 4 + 4,
-  12 * 4 + 5,
   12 * 4 + 6,
-  12 * 4 + 7,
+  12 * 4 + 8,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 8,
+  12 * 4 + 4,
+  12 * 4 + 8,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 6,
+  12 * 4 + 8,
+  12 * 4 + 10,
+  12 * 4 + 8,
+  12 * 4 + 4,
+  12 * 4 + 6,
+  12 * 4 + 8,
+  12 * 4 + 10,
   12 * 4 + 8,
   MUSIC_END
 };
 
-const unsigned char intro_music_notes2[6] = {
-  12 * 2 + 8,
-  12 * 2 + 7,
-  12 * 2 + 6,
-  12 * 2 + 5,
-  12 * 2 + 4,
+const unsigned char intro_music_notes2[2] = {
+  12 * 4 + 4,
   MUSIC_END
 };
 
 const struct music intro_music = {
-  0,
-  0x11,
-  0x11,
-  0xf1,
-  25,
-  25,
-  intro_music_notes1,
   0x0800,
   0x41,
   0x11,
   0xf1,
-  50,
-  25,
+  5,
+  5,
+  intro_music_notes1,
+  0,
+  0x11,
+  0x11,
+  0xf1,
+  15,
+  5,
   intro_music_notes2
+};
+
+const unsigned char game_music_notes1[21] = {
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 6,
+  12 * 4 + 8,
+  12 * 4 + 10,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 6,
+  12 * 4 + 8,
+  12 * 4 + 10,
+  12 * 4 + 4,
+  12 * 4 + 6,
+  12 * 4 + 8,
+  12 * 4 + 6,
+  12 * 4 + 4,
+  12 * 4 + 6,
+  12 * 4 + 6,
+  12 * 4 + 4,
+  12 * 4 + 8,
+  12 * 4 + 8,
+  MUSIC_END
+};
+
+const unsigned char game_music_notes2[2] = {
+  12 * 4 + 4,
+  MUSIC_END
+};
+
+const struct music game_music = {
+  0x0800,
+  0x41,
+  0x11,
+  0xf1,
+  5,
+  5,
+  game_music_notes1,
+  0,
+  0x11,
+  0x11,
+  0xf1,
+  15,
+  5,
+  game_music_notes2
+};
+
+const unsigned char high_score_music_notes1[16] = {
+  12 * 4 + 4,
+  12 * 4 + 6,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 8,
+  12 * 4 + 4,
+  12 * 4 + 6,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 8,
+  12 * 4 + 4,
+  12 * 4 + 8,
+  12 * 4 + 8,
+  12 * 4 + 4,
+  12 * 4 + 8,
+  MUSIC_END
+};
+
+const unsigned char high_score_music_notes2[2] = {
+  12 * 4 + 4,
+  MUSIC_END
+};
+
+const struct music high_score_music = {
+  0x0800,
+  0x41,
+  0x11,
+  0xf1,
+  10,
+  5,
+  high_score_music_notes1,
+  0,
+  0x11,
+  0x11,
+  0xf1,
+  20,
+  10,
+  high_score_music_notes2
+};
+
+const unsigned char game_over_music_notes1[26] = {
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 6,
+  12 * 4 + 8,
+  12 * 4 + 6,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 6,
+  12 * 4 + 8,
+  12 * 4 + 6,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 6,
+  12 * 4 + 6,
+  12 * 4 + 8,
+  12 * 4 + 6,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  12 * 4 + 4,
+  MUSIC_END
+};
+
+const unsigned char game_over_music_notes2[2] = {
+  MUSIC_NONE,
+  MUSIC_END
+};
+
+const struct music game_over_music = {
+  0x0800,
+  0x41,
+  0x11,
+  0xf1,
+  5,
+  5,
+  game_over_music_notes1,
+  0,
+  0x11,
+  0x11,
+  0xf1,
+  5,
+  5,
+  game_over_music_notes2
 };
 
 struct music current_music;

@@ -40,6 +40,9 @@ struct music
 };
 
 extern const struct music intro_music;
+extern const struct music game_music;
+extern const struct music high_score_music;
+extern const struct music game_over_music;
 
 extern struct current_music;
 extern char is_music_start1;

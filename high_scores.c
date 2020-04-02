@@ -20,6 +20,7 @@
 #include <string.h>
 #include "graphics.h"
 #include "high_scores.h"
+#include "musics.h"
 #include "util.h"
 
 struct high_score high_scores[10];
@@ -96,6 +97,8 @@ void high_scores_draw(void)
 void high_scores_loop(void)
 {
   char is_fire = 0;
+  music_set(&high_score_music);
+  music_start();
   SEI();
   while(1) {
     char is_pressed = 0;
@@ -109,8 +112,11 @@ void high_scores_loop(void)
       is_fire = 0;
     }
     if(is_pressed) break;
+    while(VIC.rasterline != RASTER_OFFSET + 25 * 8);
+    music_play();
   }
   CLI();
+  music_stop();
 }
 
 char high_scores_can_add_high_score(unsigned long score)

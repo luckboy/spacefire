@@ -27,10 +27,10 @@ clean:
 	rm -f spacefire $(OBJS) *.d64 *~
 
 enemy_descs.o: enemy_descs.c enemy_descs.h graphics.h
-game.o: game.c game.h enemy_descs.h graphics.h high_scores.h levels.h util.h
+game.o: game.c game.h enemy_descs.h graphics.h high_scores.h levels.h musics.h util.h
 game_asm.o: game_asm.s game.inc enemy_descs.inc graphics.inc levels.inc
 graphics.o: graphics.c graphics.h
-high_scores.o: high_scores.c high_scores.h graphics.h util.h
+high_scores.o: high_scores.c high_scores.h graphics.h musics.h util.h
 levels.o: levels.c levels.h
 main.o: main.c game.h graphics.h high_scores.h main_menu.h
 main_menu.o: main_menu.c main_menu.h game.h graphics.h high_scores.h musics.h util.h
