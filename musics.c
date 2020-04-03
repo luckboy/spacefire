@@ -152,7 +152,7 @@ const struct music high_score_music = {
   high_score_music_notes2
 };
 
-const unsigned char game_over_music_notes1[26] = {
+const unsigned char game_over_music_notes1[27] = {
   12 * 4 + 4,
   12 * 4 + 4,
   12 * 4 + 4,
@@ -171,6 +171,7 @@ const unsigned char game_over_music_notes1[26] = {
   12 * 4 + 6,
   12 * 4 + 8,
   12 * 4 + 6,
+  12 * 4 + 4,
   12 * 4 + 4,
   12 * 4 + 4,
   12 * 4 + 4,
@@ -182,7 +183,7 @@ const unsigned char game_over_music_notes1[26] = {
 };
 
 const unsigned char game_over_music_notes2[2] = {
-  MUSIC_NONE,
+  12 * 4 + 4,
   MUSIC_END
 };
 
@@ -198,7 +199,7 @@ const struct music game_over_music = {
   0x11,
   0x11,
   0xf1,
-  5,
+  15,
   5,
   game_over_music_notes2
 };
