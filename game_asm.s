@@ -717,8 +717,10 @@ L0701:  bcs L0702                               ; !(player.x < PASSING_PLAYER_X_
         adc #0
         sta _player + player::x_coord + 1
         lda #1
+        ldx #0
         rts
 L0702:  lda #0
+        tax
         rts
 .endproc
 
@@ -926,8 +928,10 @@ L1101:  lda _player + player::state
         cmp _player + player::end_explosion_sprite
         bcs L1103
         lda #1
+        ldx #0
         rts
 L1103:  lda #0
+        tax
         rts
 .endproc
 
