@@ -471,7 +471,8 @@ void game_loop(void)
   unsigned char i;
   player.lives = 3;
   player.score = 0;
-  for(i = start_level_index; i < end_level_index; i++) {
+  i = start_level_index;
+  while(1) {
     char is_game_over = 0;
     current_level_index = i;
     current_level = levels[i];
@@ -491,6 +492,8 @@ void game_loop(void)
       }
     }
     if(is_game_over) break;
+    i++;
+    if(i >= end_level_index) i = start_level_index;
   }
   set_game_over();
   draw_game_over();
