@@ -358,7 +358,7 @@ static void draw_blank_screen(void)
   VIC.ctrl1 |= 0x10;
 }
 
-static void set_game_over()
+static void set_game_over(void)
 { music_set(&game_over_music); }
 
 static void draw_game_over(void)
