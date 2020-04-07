@@ -757,9 +757,9 @@ Ltab_shot_xs:
         bcc L0801
         lda #0
         sta _shot_alloc_index
-        lda #1
+L0801:  lda #1
         sta _sound_effect_flags + 0
-L0801:  rts
+        rts
 .endproc
 
 .proc _game_move_shots
