@@ -61,7 +61,7 @@
         .import _enemy_explosion
         .import _enemy_descs
         .import _sound_effect_flags
-        .importzp tmp1, ptr1
+        .importzp tmp1, tmp2, ptr1
         
         .include "c64.inc"
         .include "enemy_descs.inc"
@@ -736,28 +736,41 @@ Ltab_shot_xs:
 .proc _game_player_shoot
         ldx _shot_alloc_index
         ldy Ltab_shot_xs, x
-        lda #1
-        sta _shots + shot::is_enabled, y
         lda _player + player::x_coord
-        sta _shots + shot::x_coord, y
+        sta tmp1
         lda _player + player::x_coord + 1
-        sta _shots + shot::x_coord + 1, y
+        sta tmp2
         clc
-        lda _shots + shot::x_coord, y
+        lda tmp1
         adc #24
-        sta _shots + shot::x_coord, y
-        lda _shots + shot::x_coord + 1, y
+        sta tmp1
+        lda tmp2
         adc #0
+        sta tmp2
+        lda tmp2
+        cmp #>SHOT_X_MAX
+        bne L0801
+        lda tmp1
+        cmp #<SHOT_X_MAX
+L0801:  bcc L0802
+        lda #0
+        sta _shots + shot::is_enabled, y
+        jmp L0803
+L0802:  lda #1
+        sta _shots + shot::is_enabled, y
+        lda tmp1
+        sta _shots + shot::x_coord, y
+        lda tmp2
         sta _shots + shot::x_coord + 1, y
         lda _player + player::y_coord
         sta _shots + player::y_coord, y
-        inc _shot_alloc_index
+L0803:  inc _shot_alloc_index
         lda _shot_alloc_index
         cmp #GAME_SHOT_COUNT_MAX
-        bcc L0801
+        bcc L0804
         lda #0
         sta _shot_alloc_index
-L0801:  lda #1
+L0804:  lda #1
         sta _sound_effect_flags + 0
         rts
 .endproc
