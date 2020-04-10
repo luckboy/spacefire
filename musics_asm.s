@@ -31,6 +31,8 @@
         .include "c64.inc"
         .include "musics.inc"
 
+        .code
+
 .proc _music_play
         ; 1
         lda _is_music_start1
