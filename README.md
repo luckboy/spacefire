@@ -2,7 +2,7 @@
 
 Space Fire is game for Commodore 64. This game is space shooter. Space Fire is written in C programming
 language and assembly programming language. The cc65 package is used to compilation of this game and
-VICE package is used to creation of disk image with this game.
+the VICE package is used to creation of disk image with this game.
 
 ## Compilation
 
