@@ -177,6 +177,8 @@ void main_menu_loop(void)
         is_exit = 1;
         break;
       }
+      up_count = 0;
+      down_count = 0;
     }
     while(VIC.rasterline != RASTER_OFFSET + 25 * 8);
     music_play();
